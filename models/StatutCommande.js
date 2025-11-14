@@ -1,0 +1,6 @@
+module.exports = {
+  EN_ATTENTE: "EN_ATTENTE",
+  EN_LIVRAISON: "EN_LIVRAISON",
+  LIVREE: "LIVREE",
+  ANNULEE: "ANNULEE"
+};
