@@ -1,0 +1,19 @@
+<h2>Créer un compte</h2>
+
+<form action="/signup" method="POST">
+    <input type="text" name="username" placeholder="Nom" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Mot de passe" required>
+
+    <select name="role" required>
+        <option value="Client">Client</option>
+        <option value="Livreur">Livreur</option>
+        <option value="Restaurant">Restaurant</option>
+        <option value="Admin">Admin</option>
+    </select>
+
+    <input type="text" name="nomRestaurant" placeholder="Nom restaurant (si Restaurant)">
+    <button type="submit">Créer</button>
+</form>
+
+<a href="/login">Déjà un compte ?</a>
