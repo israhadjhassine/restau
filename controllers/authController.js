@@ -7,7 +7,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 // Signup
-exports.signup = async (req, res) => {
+/*exports.signup = async (req, res) => {
   try {
     const { username, email, password, role, nomRestaurant } = req.body;
 
@@ -44,39 +44,51 @@ exports.signup = async (req, res) => {
   } catch(err) {
     res.status(500).json({ error: err.message });
   }
+};*/
+
+exports.signup = async (req, res) => {
+  try {
+    const { username, email, password, role, nomRestaurant } = req.body;
+
+    // Vérifier si email existe déjà
+    const exist = await User.findOne({ email });
+    if (exist) return res.redirect("/signup?error=email");
+
+    // Hachage du mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    let newUser;
+
+    switch (role) {
+      case "Client":
+        newUser = new Client({ username, email, password: hashedPassword, statut: "en_attente" });
+        break;
+
+      case "Livreur":
+        newUser = new Livreur({ username, email, password: hashedPassword, statut: "en_attente" });
+        break;
+
+      case "Restaurant":
+        newUser = new Restaurant({ username, email, password: hashedPassword, nomRestaurant, statut: "en_attente" });
+        break;
+
+      case "Admin":
+        newUser = new Admin({ username, email, password: hashedPassword, statut: "valide" });
+        break;
+    }
+
+    await newUser.save();
+
+    // 🔥 REDIRECTION VERS LOGIN
+    return res.redirect("/login?attente=1");
+
+  } catch (error) {
+    console.log(error);
+    return res.redirect("/signup?error=server");
+  }
 };
 
-// Login
-/*exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user)
-      return res.status(400).json({ error: "Email ou mot de passe incorrect" });
 
-    // Vérifier si le compte est validé
-    if (user.statut === "en_attente")
-      return res.status(403).json({ error: "Votre compte est en attente de validation." });
-
-    if (user.statut === "bloque")
-      return res.status(403).json({ error: "Votre compte est bloqué." });
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.status(400).json({ error: "Email ou mot de passe incorrect" });
-
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      "SECRET_KEY",
-      { expiresIn: "1d" }
-    );
-
-    res.json({ token, user });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};*/
 
 
 

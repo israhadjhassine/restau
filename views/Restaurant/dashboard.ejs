@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Restaurant</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:20px; }
+  h1, h2, h3 { color: #333; }
+  .container { width: 90%; margin: auto; }
+  .card { background:white; padding:20px; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom:20px; }
+  table { width: 100%; border-collapse: collapse; margin-top:10px; }
+  th, td { padding: 10px; border: 1px solid #ddd; text-align:center; }
+  th { background:#333; color:white; }
+  .btn { padding: 6px 12px; border:none; border-radius:5px; cursor:pointer; color:white; transition:0.3s; margin:2px; }
+  .btn.success { background:#28a745; }
+  .btn.success:hover { background:#218838; }
+  .btn.danger { background:#dc3545; }
+  .btn.danger:hover { background:#c82333; }
+  .btn.info { background:#007bff; }
+  .btn.info:hover { background:#0069d9; }
+  input, select, textarea { width:100%; padding:8px; margin:5px 0; border-radius:5px; border:1px solid #ccc; box-sizing:border-box; }
+  textarea { resize: vertical; }
+  .hidden { display:none; }
+</style>
+<script>
+  function toggleForm(id) {
+    const form = document.getElementById(id);
+    form.classList.toggle("hidden");
+    window.scrollTo(0, form.offsetTop - 20);
+  }
+</script>
+</head>
+<body>
+
+<div class="container">
+  <h1>Bienvenue <%= restaurant.nomRestaurant %></h1>
+
+  <!-- Bouton Ajouter Menu -->
+  <button class="btn success" onclick="toggleForm('menuForm')">Ajouter un Menu</button>
+  
+  <!-- Formulaire Ajouter Menu -->
+  <div id="menuForm" class="card hidden">
+    <h2>Ajouter un Menu</h2>
+    <form action="/restaurant/menus" method="POST">
+      <input type="text" name="titre" placeholder="Titre du menu" required>
+      <button type="submit" class="btn success">Ajouter</button>
+    </form>
+  </div>
+
+  <!-- Liste des Menus -->
+  <% restaurant.menu.forEach(menu => { %>
+    <div class="card">
+      <h2><%= menu.titre %>
+        <!-- Boutons Menu -->
+        <form action="/restaurant/menus/delete/<%= menu._id %>" method="POST" style="display:inline;">
+          <button class="btn danger">Supprimer</button>
+        </form>
+        <button class="btn info" onclick="toggleForm('editMenu<%= menu._id %>')">Modifier</button>
+      </h2>
+
+      <!-- Formulaire Modifier Menu -->
+      <div id="editMenu<%= menu._id %>" class="hidden">
+        <form action="/restaurant/menus/edit/<%= menu._id %>" method="POST">
+          <input type="text" name="titre" value="<%= menu.titre %>" required>
+          <button class="btn success">Modifier</button>
+        </form>
+      </div>
+
+      <!-- Bouton Ajouter Plat -->
+      <button class="btn success" onclick="toggleForm('platForm<%= menu._id %>')">Ajouter un Plat</button>
+
+      <!-- Formulaire Ajouter Plat -->
+      <div id="platForm<%= menu._id %>" class="hidden">
+        <form action="/restaurant/plats" method="POST">
+          <input type="text" name="nom" placeholder="Nom du plat" required>
+          <textarea name="description" placeholder="Description" required></textarea>
+          <input type="number" name="prix" placeholder="Prix" required>
+          <input type="text" name="image" placeholder="URL de l'image">
+          <input type="hidden" name="menuTitre" value="<%= menu.titre %>">
+          <button type="submit" class="btn success">Ajouter le plat</button>
+        </form>
+      </div>
+
+      <!-- Liste des Plats -->
+      <h3>Plats :</h3>
+      <% if(menu.plats.length > 0) { %>
+        <table>
+          <tr>
+            <th>Nom</th>
+            <th>Description</th>
+            <th>Prix</th>
+            <th>Image</th>
+            <th>Actions</th>
+          </tr>
+          <% menu.plats.forEach(plat => { %>
+            <tr>
+              <td><%= plat.nom %></td>
+              <td><%= plat.description %></td>
+              <td><%= plat.prix %></td>
+              <td>
+                <% if(plat.image) { %>
+                  <img src="<%= plat.image %>" width="50">
+                <% } else { %>
+                  -
+                <% } %>
+              </td>
+              <td>
+                <form action="/restaurant/plats/delete/<%= plat._id %>" method="POST" style="display:inline;">
+                  <button class="btn danger">Supprimer</button>
+                </form>
+                <button class="btn info" onclick="toggleForm('editPlat<%= plat._id %>')">Modifier</button>
+              </td>
+            </tr>
+
+            <!-- Formulaire Modifier Plat -->
+            <tr id="editPlat<%= plat._id %>" class="hidden">
+              <td colspan="5">
+                <form action="/restaurant/plats/edit/<%= plat._id %>" method="POST">
+                  <input type="text" name="nom" value="<%= plat.nom %>" required>
+                  <textarea name="description" required><%= plat.description %></textarea>
+                  <input type="number" name="prix" value="<%= plat.prix %>" required>
+                  <input type="text" name="image" value="<%= plat.image %>">
+                  <button class="btn success">Modifier</button>
+                </form>
+              </td>
+            </tr>
+
+          <% }) %>
+        </table>
+      <% } else { %>
+        <p>Aucun plat pour ce menu.</p>
+      <% } %>
+    </div>
+  <% }) %>
+</div>
+
+</body>
+</html>

@@ -1,38 +1,27 @@
 const express = require("express");
-const Restaurant = require("../models/Restaurant");
-const Plat = require("../models/Plat");
-
 const router = express.Router();
 
-// Ajouter un restaurant
-router.post("/", async (req, res) => {
-    try {
-        const restaurant = new Restaurant(req.body);
-        await restaurant.save();
-        res.status(201).json(restaurant);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
+const restaurantController = require("../controllers/restaurantController");
 
-// Récupérer tous les restaurants
-router.get("/", async (req, res) => {
-    const restaurants = await Restaurant.find().populate("menu");
-    res.json(restaurants);
-});
+// Dashboard
+router.get("/home", restaurantController.getDashboard);
 
-// Ajouter un plat à un restaurant
-router.post("/:id/plats", async (req, res) => {
-    try {
-        const plat = new Plat(req.body);
-        await plat.save();
-        const restaurant = await Restaurant.findById(req.params.id);
-        restaurant.menu.push(plat._id);
-        await restaurant.save();
-        res.json({ restaurant, plat });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
+// Ajouter menu
+router.post("/menus", restaurantController.ajouterMenu);
+
+// Modifier menu
+router.post("/menus/edit/:id", restaurantController.modifierMenu);
+
+// Supprimer menu
+router.post("/menus/delete/:id", restaurantController.supprimerMenu);
+
+// Ajouter plat
+router.post("/plats", restaurantController.ajouterPlat);
+
+// Modifier plat
+router.post("/plats/edit/:id", restaurantController.modifierPlat);
+
+// Supprimer plat
+router.post("/plats/delete/:id", restaurantController.supprimerPlat);
 
 module.exports = router;
