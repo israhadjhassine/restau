@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 
 const PlatSchema = new mongoose.Schema({
-  id_plat:{
-    type: Number,
-    unique: true,     
-    
-  },
   nom: String,
   description: String,
   prix: Number,
@@ -13,4 +8,4 @@ const PlatSchema = new mongoose.Schema({
   menu: { type: mongoose.Schema.Types.ObjectId, ref: "Menu" },
 });
 
-module.exports = mongoose.model("Plat", PlatSchema);
+module.exports = mongoose.model("Plat", PlatSchema); // ⚠️ Important !

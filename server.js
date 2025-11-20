@@ -23,6 +23,8 @@ require("./models/Commande");
 require("./models/Paiement");
 require("./models/Reclamation");
 
+
+
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
@@ -38,10 +40,14 @@ const path = require("path");
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-//app.use("/users", require("./routes/userRoutes"));
-//app.use("/restaurant", require("./routes/restaurantRoutes"));
+const authMiddleware = require("./middleware/auth");
+
+app.use("/restaurant", authMiddleware, require("./routes/restaurantRoutes"));
+app.use("/admin", authMiddleware, require("./routes/adminRoutes"));
+// Les routes publiques (login/signup) n'ont pas besoin du middleware
 app.use("", require("./routes/authRoute"));
-app.use("/admin", require("./routes/adminRoutes"));
+
+
 
 
 
