@@ -42,6 +42,7 @@ app.set("views", path.join(__dirname, "views"));
 //app.use("/restaurant", require("./routes/restaurantRoutes"));
 app.use("", require("./routes/authRoute"));
 app.use("/admin", require("./routes/adminRoutes"));
+app.use("/livreur", require("./routes/livreur"));
 
 
 

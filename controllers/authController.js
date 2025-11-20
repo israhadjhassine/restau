@@ -111,7 +111,8 @@ exports.login = async (req, res) => {
     let redirect = "";
     if (user.role === "Admin") return res.redirect ("/admin/dashboard");
     else if (user.role === "Client") return res.redirect ("/client/home");
-    else if (user.role === "Livreur") return res.redirect  ("/livreur/home");
+    else if (user.role === "Livreur") return res.redirect("/livreur/dashboard");
+
     else if (user.role === "Restaurant") return res.redirect  ("/restaurant/home");
 
 

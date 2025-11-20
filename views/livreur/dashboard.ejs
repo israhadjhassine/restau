@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Livreur</title>
+    
+</head>
+<body>
+
+<h1>Bienvenue <%= user.username %> 👋</h1>
+
+<div class="card">
+    <h2>État de disponibilité</h2>
+
+    <form action="/livreur/disponibilite" method="POST">
+        <label>
+            <input type="radio" name="disponible" value="true" <%= user.disponible ? "checked" : "" %> >
+            Disponible
+        </label>
+
+        <label>
+            <input type="radio" name="disponible" value="false" <%= !user.disponible ? "checked" : "" %> >
+            Indisponible
+        </label>
+
+        <button type="submit">Mettre à jour</button>
+    </form>
+</div>
+
+<div class="card">
+    <a class="btn" href="/livreur/commandes">📦 Mes commandes</a>
+</div>
+
+<div class="card">
+    <button onclick="sendLocation()">📍 Partager ma position</button>
+</div>
+
+<script>
+const userId = "<%= user._id %>"; // récupère l'_id MongoDB
+
+function sendLocation() {
+    navigator.geolocation.getCurrentPosition(position => {
+        fetch("/livreur/localisation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                lat: position.coords.latitude,
+                long: position.coords.longitude,
+                // livreurId n’est plus nécessaire à envoyer depuis le front, car middleware fournit req.user._id
+            })
+        })
+        .then(res => res.text())
+        .then(msg => console.log(msg))
+        .catch(err => console.error(err));
+    });
+}
+</script>
+
+
+</body>
+</html>

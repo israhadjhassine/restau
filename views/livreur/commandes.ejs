@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Commandes Livreur</title>
+    
+</head>
+<body>
+
+<h1>📦 Commandes assignées</h1>
+
+<% if (commandes.length === 0) { %>
+    <p>Aucune commande pour le moment.</p>
+<% } %>
+
+<% commandes.forEach(cmd => { %>
+<div class="card">
+
+    <h2>Commande #<%= cmd.id_commande %></h2>
+
+    <p><strong>Client :</strong> <%= cmd.client.username %></p>
+    <p><strong>Montant :</strong> <%= cmd.montantTotal %> DT</p>
+    <p><strong>Statut :</strong> <%= cmd.statut %></p>
+
+    <h3>Plats :</h3>
+    <ul>
+        <% cmd.plats.forEach(pl => { %>
+            <li><%= pl.nom %> — <%= pl.prix %> DT</li>
+        <% }) %>
+    </ul>
+
+    <form action="/livreur/commande/<%= cmd._id %>/statut" method="POST">
+        <select name="statut">
+            <option value="EN_LIVRAISON">En livraison</option>
+            <option value="LIVREE">Livrée</option>
+            <option value="ANNULEE">Annulée</option>
+        </select>
+        <button type="submit">Mettre à jour</button>
+    </form>
+
+</div>
+<% }) %>
+
+</body>
+</html>
