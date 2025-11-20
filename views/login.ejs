@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <title>Connexion</title>
   <style>
     body {
@@ -45,6 +47,25 @@
   </style>
 </head>
 <body>
+<% if (query.attente == 1) { %>
+<script>
+Swal.fire({
+    title: "Inscription en attente",
+    text: "Votre compte doit être validé par un administrateur.",
+    icon: "info",
+    confirmButtonText: "OK",
+    confirmButtonColor: "#6c63ff",
+    background: "#fff",
+    color: "#333",
+    showClass: {
+        popup: "swal2-noanimation",
+        backdrop: "swal2-noanimation"
+    }
+});
+</script>
+<% } %>
+
+
 
 <form action="/login" method="POST">
     <h2>Connexion</h2>

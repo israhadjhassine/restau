@@ -35,6 +35,9 @@ app.get("/", (req, res) => {
   res.send("Base de données créée et modèles chargés !");
 });
 
+
+
+
 const path = require("path");
 
 app.set("view engine", "ejs");

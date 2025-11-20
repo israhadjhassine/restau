@@ -8,10 +8,10 @@ exports.getInscriptionsEnAttente = async (req, res) => {
 };
 
 // Valider un compte
-exports.validerCompte = async (req, res) => {
+/*exports.validerCompte = async (req, res) => {
   await User.findByIdAndUpdate(req.params.id, { statut: "valide" });
   res.redirect("/admin/inscriptions");
-};
+};*/
 
 // Bloquer un compte
 exports.bloquerCompte = async (req, res) => {
@@ -29,4 +29,22 @@ exports.getRestaurants = async (req, res) => {
 exports.supprimerRestaurant = async (req, res) => {
   await Restaurant.findByIdAndDelete(req.params.id);
   res.redirect("/admin/restaurants");
+};
+
+
+const { sendEmail } = require("../utils/mailer");
+
+// Après validation d’un compte
+exports.validerCompte = async (req, res) => {
+  const user = await User.findByIdAndUpdate(req.params.id, { statut: "valide" }, { new: true });
+
+  // Envoyer l'email de validation
+  await sendEmail(
+    user.email,
+    "Compte validé ✔️",
+    `Bonjour ${user.username}, votre inscription est maintenant validée. Vous pouvez vous connecter.`,
+    `<p>Bonjour <b>${user.username}</b>,</p><p>Votre inscription est maintenant <b>validée</b>. Vous pouvez vous connecter.</p>`
+  );
+
+  res.redirect("/admin/inscriptions");
 };
