@@ -1,5 +1,7 @@
 const express = require("express");
 const connectDB = require("./config/db");
+const session = require("express-session");
+
 
 // Initialisation
 const app = express();
@@ -21,6 +23,12 @@ require("./models/Commande");
 require("./models/Paiement");
 require("./models/Reclamation");
 
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
+
+
+
 app.get("/", (req, res) => {
   res.send("Base de données créée et modèles chargés !");
 });
@@ -33,6 +41,11 @@ app.set("views", path.join(__dirname, "views"));
 //app.use("/users", require("./routes/userRoutes"));
 //app.use("/restaurant", require("./routes/restaurantRoutes"));
 app.use("", require("./routes/authRoute"));
+app.use("/admin", require("./routes/adminRoutes"));
+
+
+
+
 
 // Lancement du serveur
 const PORT = 3000;

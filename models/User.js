@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+
 const UserSchema = new mongoose.Schema({
   id_user: {
     type: Number,
@@ -9,6 +10,25 @@ const UserSchema = new mongoose.Schema({
   username: String,
   email: String,
   password: String,
-}, { discriminatorKey: "role", timestamps: true });
 
-module.exports = mongoose.model("User", UserSchema);
+  statut: {
+    type: String,
+    enum: ["en_attente", "valide", "bloque"],
+    default: "en_attente"
+  }
+}, { discriminatorKey: "role", timestamps: true });
+const User = mongoose.model("User", UserSchema); // <-- définir ici
+
+async function getNextUserId() {
+  const lastUser = await User.findOne().sort({ id_user: -1 });
+  return lastUser ? lastUser.id_user + 1 : 1;
+}
+
+UserSchema.pre("save", async function (next) {
+  if (!this.id_user) {
+    this.id_user = await getNextUserId();
+  }
+  next();
+});
+
+module.exports = User;
