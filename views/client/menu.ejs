@@ -1,0 +1,17 @@
+<h2>Menu - <%= restaurant.nomRestaurant %></h2>
+
+
+<% menus.forEach(menu => { %>
+<h3><%= menu.titre %></h3>
+<ul>
+<% menu.plats.forEach(p => { %>
+<li>
+<strong><%= p.nomPlat %></strong> - <%= p.prix %> DT
+<form action="/client/cart/add" method="POST" style="display:inline;">
+<input type="hidden" name="platId" value="<%= p._id %>">
+<button type="submit">Ajouter</button>
+</form>
+</li>
+<% }) %>
+</ul>
+<% }) %>

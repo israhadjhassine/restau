@@ -1,0 +1,10 @@
+<h2>Restaurants</h2>
+<div>
+<% restaurants.forEach(r => { %>
+<div class="card">
+<h3><%= r.nomRestaurant %></h3>
+<p><%= r.adresse %></p>
+<a href="/client/menu/<%= r._id %>">Voir Menu</a>
+</div>
+<% }) %>
+</div>

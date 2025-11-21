@@ -1,0 +1,16 @@
+<h2>Paiement</h2>
+
+
+<ul>
+<% cart.forEach(i => { %>
+<li><%= i.nomPlat %> × <%= i.quantity %></li>
+<% }) %>
+</ul>
+
+
+<h3>Total : <%= total %> DT</h3>
+
+
+<form action="/client/order" method="POST">
+<button type="submit">Payer maintenant</button>
+</form>

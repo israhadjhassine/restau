@@ -1,0 +1,15 @@
+<h2>Panier</h2>
+
+
+<% if (cart.length === 0) { %>
+<p>Votre panier est vide.</p>
+<% } else { %>
+<ul>
+<% cart.forEach(i => { %>
+<li>
+<%= i.nomPlat %> × <%= i.quantity %> — <%= i.prix * i.quantity %> DT
+</li>
+<% }) %>
+</ul>
+<a href="/client/checkout">Passer au paiement</a>
+<% } %>
