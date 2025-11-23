@@ -14,13 +14,16 @@
         .hero-content h1 { font-size: 3rem; margin-bottom: 1rem; }
         .btn { display: inline-block; background: #e44d26; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 0.5rem; transition: background 0.3s; }
         .btn:hover { background: #c63d1a; }
+        .btn-secondary { background: transparent; border: 2px solid white; }
         .section { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; }
         .restaurant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem; }
         .restaurant-card { border: 1px solid #ddd; border-radius: 10px; overflow: hidden; transition: transform 0.3s; cursor: pointer; }
         .restaurant-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .restaurant-image { height: 200px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #666; }
         .restaurant-info { padding: 1.5rem; }
-        .cart-indicator { background: #ff4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.8rem; margin-left: 5px; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .feature-card { text-align: center; padding: 2rem; }
+        .feature-icon { font-size: 3rem; margin-bottom: 1rem; }
     </style>
 </head>
 <body>
@@ -30,25 +33,38 @@
         </div>
         <div class="nav-links">
             <a href="/client/restaurants">Restaurants</a>
-            <% if (user) { %>
-                <a href="/client/cart">Panier <span class="cart-indicator" id="cartCount"><%= user.cartCount || 0 %></span></a>
-                <a href="/client/dashboard">Mon Compte</a>
-                <a href="/logout">Déconnexion</a>
-            <% } else { %>
-                <a href="/login">Connexion</a>
-                <a href="/signup">Inscription</a>
-            <% } %>
+            <a href="/login">Connexion</a>
+            <a href="/signup">Inscription</a>
         </div>
     </nav>
 
     <section class="hero">
         <div class="hero-content">
             <h1>Vos plats préférés, livrés chez vous</h1>
-            <p>Découvrez les meilleurs restaurants de votre ville</p>
-            <a href="/client/restaurants" class="btn">Voir les restaurants</a>
-            <% if (!user) { %>
-                <a href="/signup" class="btn">Créer un compte</a>
-            <% } %>
+            <p>Commandez en ligne auprès des meilleurs restaurants de votre ville</p>
+            <a href="/client/restaurants" class="btn">Découvrir les restaurants</a>
+            <a href="/signup" class="btn btn-secondary">Créer un compte gratuit</a>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Pourquoi choisir FoodDelivery ?</h2>
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🚚</div>
+                <h3>Livraison Rapide</h3>
+                <p>Recevez vos plats en moins de 30 minutes</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🍕</div>
+                <h3>Large Choix</h3>
+                <p>Des centaines de restaurants partenaires</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3>Paiement Sécurisé</h3>
+                <p>Paiement en ligne 100% sécurisé</p>
+            </div>
         </div>
     </section>
 
@@ -62,10 +78,9 @@
                             <span>Image du restaurant</span>
                         </div>
                         <div class="restaurant-info">
-                            <h3><%= restaurant.name %></h3>
-                            <p><%= restaurant.description %></p>
-                            <p><strong>Type:</strong> <%= restaurant.cuisineType %></p>
-                            <p><strong>Adresse:</strong> <%= restaurant.address %></p>
+                            <h3><%= restaurant.nomRestaurant %></h3>
+                            <p><%= restaurant.adresse %></p>
+                            <p><strong>Téléphone:</strong> <%= restaurant.telephone %></p>
                         </div>
                     </div>
                 <% }); %>
@@ -73,25 +88,22 @@
                 <p style="grid-column: 1 / -1; text-align: center;">Aucun restaurant disponible pour le moment.</p>
             <% } %>
         </div>
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="/client/restaurants" class="btn">Voir tous les restaurants</a>
+        </div>
+    </section>
+
+    <section class="section" style="background: #f5f5f5; text-align: center;">
+        <h2>Prêt à commander ?</h2>
+        <p style="margin: 1rem 0;">Rejoignez nos milliers de clients satisfaits</p>
+        <a href="/signup" class="btn">Créer mon compte</a>
+        <p style="margin-top: 1rem;">Déjà membre ? <a href="/login" style="color: #e44d26;">Connectez-vous</a></p>
     </section>
 
     <script>
         function viewMenu(restaurantId) {
             window.location.href = '/client/menu/' + restaurantId;
         }
-
-        // Simple cart count update
-        function updateCartCount() {
-            // This would typically fetch from an API, but for now we'll use the session data
-            const cartCountElement = document.getElementById('cartCount');
-            if (cartCountElement) {
-                // If we have cart data in session, we could update it here
-                // For now, it's handled by the server-side rendering
-            }
-        }
-
-        // Initial load
-        updateCartCount();
     </script>
 </body>
 </html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Accueil - FoodDelivery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
+        .navbar { background: #e44d26; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; padding: 0.5rem 1rem; border-radius: 4px; transition: background 0.3s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
+        .welcome-banner { background: linear-gradient(135deg, #e44d26, #ff6b4a); color: white; padding: 3rem 2rem; text-align: center; }
+        .dashboard { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem; }
+        .dashboard-card { background: white; border-radius: 10px; padding: 2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; }
+        .action-btn { background: #e44d26; color: white; padding: 1rem; text-align: center; border-radius: 5px; text-decoration: none; transition: background 0.3s; }
+        .action-btn:hover { background: #c63d1a; }
+        .restaurant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem; }
+        .restaurant-card { border: 1px solid #ddd; border-radius: 10px; overflow: hidden; transition: transform 0.3s; cursor: pointer; }
+        .restaurant-card:hover { transform: translateY(-5px); }
+        .restaurant-image { height: 200px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #666; }
+        .restaurant-info { padding: 1.5rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h2>FoodDelivery</h2>
+        </div>
+        <div class="nav-links">
+            <a href="/client/restaurants">Restaurants</a>
+            <a href="/client/cart">Panier</a>
+            <a href="/client/profile">Mon Compte</a>
+            <a href="/logout">Déconnexion</a>
+        </div>
+    </nav>
+
+    <div class="welcome-banner">
+        <h1>Bonjour, <%= user.username %> !</h1>
+        <p>Que souhaitez-vous commander aujourd'hui ?</p>
+    </div>
+
+    <div class="dashboard">
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="/client/restaurants" class="action-btn">
+                <h3>📋 Voir les restaurants</h3>
+                <p>Découvrez nos restaurants partenaires</p>
+            </a>
+            <a href="/client/cart" class="action-btn">
+                <h3>🛒 Voir mon panier</h3>
+                <p>Consulter mes articles</p>
+            </a>
+            <a href="/client/dashboard" class="action-btn">
+                <h3>👤 Mon profil</h3>
+                <p>Gérer mon compte</p>
+            </a>
+        </div>
+
+        <!-- Recommended Restaurants -->
+        <div style="margin-top: 3rem;">
+            <h2>Restaurants recommandés</h2>
+            <div class="restaurant-grid">
+                <% if (restaurants && restaurants.length > 0) { %>
+                    <% restaurants.forEach(function(restaurant) { %>
+                        <div class="restaurant-card" onclick="viewMenu('<%= restaurant._id %>')">
+                            <div class="restaurant-image">
+                                <span>Image du restaurant</span>
+                            </div>
+                            <div class="restaurant-info">
+                                <h3><%= restaurant.nomRestaurant %></h3>
+                                <p><%= restaurant.adresse %></p>
+                                <p><strong>Téléphone:</strong> <%= restaurant.telephone %></p>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p style="grid-column: 1 / -1; text-align: center;">Aucun restaurant disponible pour le moment.</p>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Recent Orders (you can implement this later) -->
+        <div class="dashboard-card" style="margin-top: 3rem;">
+            <h2>Mes commandes récentes</h2>
+            <p style="color: #666; margin-top: 1rem;">Vous n'avez pas de commandes récentes.</p>
+            <a href="/client/restaurants" style="color: #e44d26; text-decoration: none; font-weight: bold;">
+                Passer ma première commande →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function viewMenu(restaurantId) {
+            window.location.href = '/client/menu/' + restaurantId;
+        }
+    </script>
+</body>
+</html>

@@ -113,7 +113,7 @@ exports.login = async (req, res) => {
   
 
 
-     const token = jwt.sign({ id: user._id, role: user.role }, "SECRET", { expiresIn: "1d" });
+     const token = jwt.sign({ id: user._id, username: user.username,  email: user.email, role: user.role }, "SECRET", { expiresIn: "1d" });
 
     // 🔹 Stocker JWT dans un cookie
     res.cookie("token", token, { httpOnly: true });
@@ -122,7 +122,7 @@ exports.login = async (req, res) => {
     // 🔹 Ajouter la redirection selon rôle
     let redirect = "";
     if (user.role === "Admin") return res.redirect ("/admin/dashboard");
-    else if (user.role === "Client") return res.redirect ("/client/home");
+  else if (user.role === "Client") return res.redirect ("/client/home-private");
     else if (user.role === "Livreur") return res.redirect("/livreur/dashboard");
 
     else if (user.role === "Restaurant") return res.redirect  ("/restaurant/home");

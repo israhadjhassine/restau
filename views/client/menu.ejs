@@ -1,17 +1,171 @@
-<h2>Menu - <%= restaurant.nomRestaurant %></h2>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - <%= restaurant.nomRestaurant %></title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
+        .navbar { background: #e44d26; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; padding: 0.5rem 1rem; border-radius: 4px; transition: background 0.3s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
+        .menu-header { background: #f5f5f5; padding: 3rem 2rem; text-align: center; }
+        .menu-container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        .menu-item { border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; transition: box-shadow 0.3s; }
+        .menu-item:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .item-info { flex: 1; }
+        .item-info h4 { margin: 0 0 0.5rem 0; color: #333; }
+        .item-info p { margin: 0; color: #666; }
+        .item-price { font-size: 1.2rem; font-weight: bold; color: #e44d26; margin-right: 1rem; }
+        .add-to-cart { background: #e44d26; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; transition: background 0.3s; }
+        .add-to-cart:hover { background: #c63d1a; }
+        .cart-summary { position: fixed; bottom: 20px; right: 20px; background: #e44d26; color: white; padding: 1rem 2rem; border-radius: 10px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .notification { position: fixed; top: 20px; right: 20px; background: #4CAF50; color: white; padding: 1rem; border-radius: 5px; display: none; z-index: 1000; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h2><a href="/" style="color: white; text-decoration: none;">FoodDelivery</a></h2>
+        </div>
+        <div class="nav-links">
+            <a href="/">Accueil</a>
+            <a href="/client/restaurants">Restaurants</a>
+            <% if (user) { %>
+                <a href="/client/cart">Panier <span class="cart-indicator" id="cartCount"><%= cart ? cart.length : 0 %></span></a>
+                <a href="/client/dashboard">Mon Compte</a>
+                <a href="/logout">Déconnexion</a>
+            <% } else { %>
+                <a href="/login">Connexion</a>
+                <a href="/signup">Inscription</a>
+            <% } %>
+        </div>
+    </nav>
 
+    <div class="menu-header">
+        <h1><%= restaurant.nomRestaurant %></h1>
+        <p><%= restaurant.adresse %></p>
+        <p><%= restaurant.telephone %></p>
+    </div>
 
-<% menus.forEach(menu => { %>
-<h3><%= menu.titre %></h3>
-<ul>
-<% menu.plats.forEach(p => { %>
-<li>
-<strong><%= p.nomPlat %></strong> - <%= p.prix %> DT
-<form action="/client/cart/add" method="POST" style="display:inline;">
-<input type="hidden" name="platId" value="<%= p._id %>">
-<button type="submit">Ajouter</button>
-</form>
-</li>
-<% }) %>
-</ul>
-<% }) %>
+    <div class="menu-container">
+        <h2>Notre Menu</h2>
+        
+        <% if (menu && menu.plats && menu.plats.length > 0) { %>
+            <div class="menu-category">
+                <h3>Plats Principaux</h3>
+                <% menu.plats.forEach(function(plat) { %>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4><%= plat.nom %></h4>
+                            <p><%= plat.description %></p>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <span class="item-price"><%= plat.prix %> €</span>
+                          <button class="add-to-cart" 
+        onclick='addToCart("<%= plat._id %>", "<%= plat.nom %>", "<%= plat.prix %>", "<%= restaurant._id %>", "<%= restaurant.nomRestaurant %>")'>
+    Ajouter
+</button>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <p style="text-align: center; color: #666; padding: 2rem;">Aucun plat disponible pour le moment.</p>
+        <% } %>
+    </div>
+
+    <!-- Cart Summary -->
+    <% if (cart && cart.length > 0) { %>
+        <div class="cart-summary" onclick="viewCart()">
+            <strong>Panier: <%= cart.length %> article(s)</strong><br>
+            Total: <%= cart.reduce(function(sum, item) { return sum + (item.price * item.quantity); }, 0).toFixed(2) %> €
+        </div>
+    <% } %>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+       function addToCart(itemId, name, price, restaurantId, restaurantName) {
+    // Parse the price from string to number
+    const parsedPrice = parseFloat(price);
+    
+    fetch('/client/cart/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            itemId: itemId,
+            nom: name,
+            prix: parsedPrice,
+            restaurantId: restaurantId,
+            nomRestaurant: restaurantName
+        })
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            showNotification(data.message);
+            updateCartCount(data.cart ? data.cart.length : 0);
+            
+            if (data.cart && data.cart.length > 0 && !document.querySelector('.cart-summary')) {
+                createCartSummary(data.cart);
+            }
+        } else if (data.needConfirmation) {
+            if (confirm(data.message)) {
+                fetch('/client/cart/clear', { method: 'POST' })
+                    .then(function() {
+                        addToCart(itemId, name, parsedPrice, restaurantId, restaurantName);
+                    });
+            }
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(function(error) {
+        console.error('Error:', error);
+        alert('Erreur lors de l\'ajout au panier');
+    });
+}
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(function() {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function updateCartCount(count) {
+            const cartCount = document.getElementById('cartCount');
+            if (cartCount) {
+                cartCount.textContent = count;
+            }
+        }
+
+        function createCartSummary(cart) {
+            const total = cart.reduce(function(sum, item) {
+                return sum + (item.price * item.quantity);
+            }, 0);
+            const summary = document.createElement('div');
+            summary.className = 'cart-summary';
+            summary.innerHTML = '<strong>Panier: ' + cart.length + ' article(s)</strong><br>Total: ' + total.toFixed(2) + ' €';
+            summary.onclick = viewCart;
+            document.body.appendChild(summary);
+        }
+
+        function viewCart() {
+            window.location.href = '/client/cart';
+        }
+
+        function viewRestaurants() {
+            window.location.href = '/client/restaurants';
+        }
+    </script>
+</body>
+</html>

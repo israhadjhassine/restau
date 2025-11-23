@@ -1,15 +1,192 @@
-<h2>Panier</h2>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panier - FoodDelivery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
+        .navbar { background: #e44d26; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; }
+        .container { max-width: 800px; margin: 2rem auto; padding: 0 2rem; }
+        .cart-item { border: 1px solid #ddd; padding: 1rem; margin: 1rem 0; display: flex; justify-content: space-between; align-items: center; }
+        .quantity-controls { display: flex; align-items: center; gap: 10px; }
+        .quantity-btn { background: #e44d26; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
+        .checkout-btn { background: #e44d26; color: white; padding: 1rem 2rem; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1rem; margin-top: 1rem; }
+        .checkout-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .login-prompt { background: #fff3cd; border: 1px solid #ffeaa7; padding: 1rem; border-radius: 5px; margin: 1rem 0; }
+        .remove-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h2><a href="/" style="color: white; text-decoration: none;">FoodDelivery</a></h2>
+        </div>
+        <div class="nav-links">
+            <a href="/">Accueil</a>
+            <a href="/client/restaurants">Restaurants</a>
+            <% if (user) { %>
+                <a href="/client/dashboard">Mon Compte</a>
+                <a href="/logout">Déconnexion</a>
+            <% } else { %>
+                <a href="/login">Connexion</a>
+                <a href="/signup">Inscription</a>
+            <% } %>
+        </div>
+    </nav>
 
+    <div class="container">
+        <h1>Votre Panier</h1>
+        
+        <% if (cart && cart.length > 0) { %>
+            <!-- Restaurant info -->
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                <h3>Commande chez: <%= cart[0].nomRestaurant || 'Restaurant' %></h3>
+            </div>
 
-<% if (cart.length === 0) { %>
-<p>Votre panier est vide.</p>
-<% } else { %>
-<ul>
-<% cart.forEach(i => { %>
-<li>
-<%= i.nomPlat %> × <%= i.quantity %> — <%= i.prix * i.quantity %> DT
-</li>
-<% }) %>
-</ul>
-<a href="/client/checkout">Passer au paiement</a>
-<% } %>
+            <!-- Cart items -->
+            <% cart.forEach(function(item) { %>
+                <div class="cart-item">
+                    <div>
+                        <h3><%= item.nom %></h3>
+                        <p>Prix unitaire: <%= item.prix %> €</p>
+                    </div>
+                    <div class="quantity-controls">
+                       <button class="quantity-btn" onclick="updateQuantity('<%= item.itemId %>', getNewQuantity('<%= item.quantite %>', -1))">-</button>
+<span style="margin: 0 10px;"><%= item.quantite %></span>
+<button class="quantity-btn" onclick="updateQuantity('<%= item.itemId %>', getNewQuantity('<%= item.quantite %>', 1))">+</button>
+   <button class="remove-btn" onclick="removeItem('<%= item.itemId %>')">×</button>
+                    </div>
+                    <div>
+                        <p><strong>Total: <%= (parseFloat(item.prix || 0) * parseInt(item.quantite || 1)).toFixed(2) %> €</strong></p>
+                    </div>
+                </div>
+            <% }); %>
+
+            <!-- Total and checkout -->
+            <div style="text-align: right; margin-top: 2rem; padding-top: 1rem; border-top: 2px solid #ddd;">
+                <h3>Total: <%= total %> €</h3>
+                
+                <% if (user) { %>
+                    <!-- User is logged in - can checkout -->
+                    <button class="checkout-btn" onclick="checkout()">Passer la commande</button>
+                <% } else { %>
+                    <!-- User is not logged in - show login prompt -->
+                    <div class="login-prompt">
+                        <h4>Connectez-vous pour commander</h4>
+                        <p>Vous devez être connecté pour finaliser votre commande.</p>
+                        <a href="/login?redirect=/client/cart" style="color: #e44d26; font-weight: bold;">Se connecter</a>
+                        <span> ou </span>
+                        <a href="/signup?redirect=/client/cart" style="color: #e44d26; font-weight: bold;">Créer un compte</a>
+                    </div>
+                    <button class="checkout-btn" disabled>Passer la commande</button>
+                <% } %>
+            </div>
+
+            <!-- Clear cart button -->
+            <div style="text-align: left; margin-top: 1rem;">
+                <button onclick="clearCart()" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
+                    Vider le panier
+                </button>
+            </div>
+
+        <% } else { %>
+            <p>Votre panier est vide</p>
+            <a href="/client/restaurants" style="color: #e44d26; font-weight: bold;">Voir les restaurants</a>
+        <% } %>
+    </div>
+
+    <script>
+
+function getNewQuantity(currentQuantite, change) {
+    const quantite = parseInt(currentQuantite) || 1;
+    return quantite + change;
+}
+
+        function updateQuantity(itemId, newQuantite) {
+            if (newQuantite < 0) return;
+            
+            fetch('/client/cart/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    itemId: itemId,
+                    quantite: newQuantite
+                })
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + (data.message || 'Erreur inconnue'));
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                alert('Erreur lors de la mise à jour de la quantité');
+            });
+        }
+
+        function removeItem(itemId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet article?')) {
+                fetch('/client/cart/remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        itemId: itemId
+                    })
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Erreur: ' + (data.message || 'Erreur inconnue'));
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
+                    alert('Erreur lors de la suppression de l\'article');
+                });
+            }
+        }
+
+        function clearCart() {
+            if (confirm('Êtes-vous sûr de vouloir vider votre panier?')) {
+                fetch('/client/cart/clear', {
+                    method: 'POST'
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Erreur: ' + (data.message || 'Erreur inconnue'));
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
+                    alert('Erreur lors du vidage du panier');
+                });
+            }
+        }
+
+        function checkout() {
+            window.location.href = '/client/checkout';
+        }
+    </script>
+</body>
+</html>
