@@ -1,16 +1,75 @@
-<h2>Paiement</h2>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - FoodDelivery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
+        .navbar { background: #e44d26; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; padding: 0.5rem 1rem; border-radius: 4px; transition: background 0.3s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
+        .container { max-width: 800px; margin: 2rem auto; padding: 0 2rem; }
+        .checkout-item { border-bottom: 1px solid #ddd; padding: 1rem 0; display: flex; justify-content: space-between; }
+        .checkout-total { border-top: 2px solid #ddd; padding-top: 1rem; margin-top: 1rem; text-align: right; }
+        .btn { background: #e44d26; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1rem; }
+        .btn:hover { background: #c63d1a; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h2><a href="/" style="color: white; text-decoration: none;">FoodDelivery</a></h2>
+        </div>
+        <div class="nav-links">
+            <a href="/client/restaurants">Restaurants</a>
+            <a href="/client/cart">Panier</a>
+            <a href="/client/home-private">Mon Compte</a>
+            <a href="/logout">Déconnexion</a>
+        </div>
+    </nav>
 
-
-<ul>
-<% cart.forEach(i => { %>
-<li><%= i.nomPlat %> × <%= i.quantity %></li>
-<% }) %>
-</ul>
-
-
-<h3>Total : <%= total %> DT</h3>
-
-
-<form action="/client/order" method="POST">
-<button type="submit">Payer maintenant</button>
-</form>
+    <div class="container">
+        <h1>Finaliser votre commande</h1>
+        
+        <% if (cart && cart.length > 0) { %>
+            <h2>Récapitulatif de la commande</h2>
+            
+            <% cart.forEach(function(item) { %>
+                <div class="checkout-item">
+                    <div>
+                        <h4><%= item.nom || item.name %></h4>
+                        <p>Quantité: <%= item.quantite || item.quantity %></p>
+                    </div>
+                    <div>
+                        <% 
+                            const prix = parseFloat(item.prix || item.price || 0);
+                            const quantite = parseInt(item.quantite || item.quantity || 1);
+                            const itemTotal = prix * quantite;
+                        %>
+                        <p><strong><%= itemTotal.toFixed(2) %> DT</strong></p>
+                    </div>
+                </div>
+            <% }); %>
+            
+            <div class="checkout-total">
+                <h3>Total: <%= total %> DT</h3>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <form action="/client/passerCommande" method="POST">
+                    <button type="submit" class="btn">Confirmer la commande</button>
+                </form>
+                <p style="margin-top: 1rem;">
+                    <a href="/client/cart" style="color: #e44d26;">Retour au panier</a>
+                </p>
+            </div>
+            
+        <% } else { %>
+            <p>Votre panier est vide</p>
+            <a href="/client/restaurants" style="color: #e44d26; font-weight: bold;">Voir les restaurants</a>
+        <% } %>
+    </div>
+</body>
+</html>

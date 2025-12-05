@@ -1,60 +1,546 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Dashboard Livreur</title>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Livreur - FoodDelivery</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* Navbar Livreur */
+        .navbar { 
+            background: #3498db; 
+            padding: 1rem 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: white; 
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        
+        .logo h2 a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+        }
+        
+        .nav-links { 
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .nav-links a { 
+            color: white; 
+            text-decoration: none; 
+            padding: 0.5rem 1rem; 
+            border-radius: 4px; 
+            transition: all 0.3s; 
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .nav-links a:hover { 
+            background: rgba(255,255,255,0.15); 
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a.active { 
+            background: #2980b9;
+        }
+        
+        .logout-btn {
+            background: #e44d26;
+            padding: 0.5rem 1.5rem;
+            border-radius: 4px;
+        }
+        
+        .logout-btn:hover {
+            background: #c63d1a;
+        }
+        
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            padding-top: 100px;
+        }
+        
+        /* Header */
+        .dashboard-header {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+        
+        .dashboard-header h1 {
+            color: #3498db;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dashboard-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            border-left: 5px solid #3498db;
+            text-align: center;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+        
+        .stat-card h3 {
+            color: #2c3e50;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #3498db;
+            margin: 0.5rem 0;
+        }
+        
+        /* Status Card */
+        .status-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .status-card h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-form {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .status-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .status-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .status-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .available {
+            color: #27ae60;
+        }
+        
+        .unavailable {
+            color: #e74c3c;
+        }
+        
+        /* Actions Grid */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            border-color: #3498db;
+        }
+        
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #3498db;
+        }
+        
+        .action-card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .action-card p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid #3498db;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn:hover {
+            background: white;
+            color: #3498db;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            border-color: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background: white;
+            color: #27ae60;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            border-color: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background: white;
+            color: #e74c3c;
+        }
+        
+        /* Location Sharing */
+        .location-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-top: 2rem;
+        }
+        
+        .location-card h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .location-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        .location-info.active {
+            display: block;
+        }
+        
+        .coordinates {
+            font-family: monospace;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1.5rem;
+                padding-top: 90px;
+            }
+            
+            .status-form {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dashboard-container {
+                padding: 1rem;
+                padding-top: 80px;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                padding: 0.6rem 1.5rem;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <h2><a href="/livreur">FoodDelivery Livreur</a></h2>
+        </div>
+        <div class="nav-links">
+            <a href="/livreur/dashboard" class="active">Dashboard</a>
+            <a href="/livreur/commandes">Mes commandes</a>
+            <a href="/livreur/historique">Historique</a>
+            <a href="/logout" class="logout-btn">Déconnexion</a>
+        </div>
+    </nav>
 
-<h1>Bienvenue <%= user.username %> 👋</h1>
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>Bienvenue, <%= user.username %> 🚴</h1>
+            <p>Gérez vos livraisons sur FoodDelivery</p>
+        </div>
 
-<div class="card">
-    <h2>État de disponibilité</h2>
+      
+        <!-- Status Card -->
+        <div class="status-card">
+            <h2>📋 État de disponibilité</h2>
+            <form action="/livreur/disponibilite" method="POST" class="status-form">
+                <div class="status-option">
+                    <input type="radio" id="disponible-true" name="disponible" value="true" 
+                           <%= user.disponible ? "checked" : "" %>>
+                    <label for="disponible-true" class="status-label available">
+                        ✅ Disponible
+                    </label>
+                </div>
+                
+                <div class="status-option">
+                    <input type="radio" id="disponible-false" name="disponible" value="false" 
+                           <%= !user.disponible ? "checked" : "" %>>
+                    <label for="disponible-false" class="status-label unavailable">
+                        ❌ Indisponible
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn">Mettre à jour</button>
+            </form>
+        </div>
 
-    <form action="/livreur/disponibilite" method="POST">
-        <label>
-            <input type="radio" name="disponible" value="true" <%= user.disponible ? "checked" : "" %> >
-            Disponible
-        </label>
+        <!-- Actions -->
+        <div class="actions-grid">
+            <div class="action-card">
+                <div class="action-icon">📦</div>
+                <h3>Mes commandes</h3>
+                <p>Consultez et gérez toutes vos commandes assignées</p>
+                <a href="/livreur/commandes" class="btn">Voir mes commandes</a>
+            </div>
+            
+          
+            
+            <div class="action-card">
+                <div class="action-icon">📍</div>
+                <h3>Partager position</h3>
+                <p>Partagez votre position en temps réel avec le système</p>
+                <button class="btn btn-success" onclick="sendLocation()">
+                    📍 Partager ma position
+                </button>
+            </div>
+        </div>
 
-        <label>
-            <input type="radio" name="disponible" value="false" <%= !user.disponible ? "checked" : "" %> >
-            Indisponible
-        </label>
+        <!-- Location Sharing -->
+        <div class="location-card">
+            <h2>📍 Position géographique</h2>
+            <p>Cliquez sur le bouton ci-dessus pour partager votre position actuelle.</p>
+            
+            <div id="locationInfo" class="location-info">
+                <p><strong>Position envoyée :</strong></p>
+                <p class="coordinates">
+                    Latitude: <span id="latValue">-</span><br>
+                    Longitude: <span id="longValue">-</span>
+                </p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #27ae60;">
+                    ✅ Position enregistrée avec succès
+                </p>
+            </div>
+            
+            <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                <p style="color: #666; font-size: 0.9rem;">
+                    <strong>💡 Information :</strong> Votre position est utilisée pour optimiser 
+                    les affectations de commandes et améliorer le suivi en temps réel.
+                </p>
+            </div>
+        </div>
+    </div>
 
-        <button type="submit">Mettre à jour</button>
-    </form>
-</div>
-
-<div class="card">
-    <a class="btn" href="/livreur/commandes">📦 Mes commandes</a>
-</div>
-
-<div class="card">
-    <button onclick="sendLocation()">📍 Partager ma position</button>
-</div>
-
-<script>
-const userId = "<%= user._id %>"; // récupère l'_id MongoDB
-
-function sendLocation() {
-    navigator.geolocation.getCurrentPosition(position => {
-        fetch("/livreur/localisation", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                lat: position.coords.latitude,
-                long: position.coords.longitude,
-                // livreurId n’est plus nécessaire à envoyer depuis le front, car middleware fournit req.user._id
-            })
-        })
-        .then(res => res.text())
-        .then(msg => console.log(msg))
-        .catch(err => console.error(err));
-    });
-}
-</script>
-
-
+    <script>
+        // Geolocation function
+        function sendLocation() {
+            if (!navigator.geolocation) {
+                alert("La géolocalisation n'est pas supportée par votre navigateur");
+                return;
+            }
+            
+            // Show loading state
+            const btn = document.querySelector('.btn-success');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⌛ Récupération de la position...';
+            btn.disabled = true;
+            
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const lat = position.coords.latitude;
+                    const long = position.coords.longitude;
+                    
+                    // Update UI
+                    document.getElementById('latValue').textContent = lat.toFixed(6);
+                    document.getElementById('longValue').textContent = long.toFixed(6);
+                    document.getElementById('locationInfo').classList.add('active');
+                    
+                    // Send to server
+                    fetch("/livreur/localisation", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            lat: lat,
+                            long: long
+                        })
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error('Erreur serveur');
+                        return res.text();
+                    })
+                    .then(msg => {
+                        console.log('Position envoyée:', msg);
+                        btn.innerHTML = '✅ Position envoyée';
+                        
+                        // Reset button after 3 seconds
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }, 3000);
+                    })
+                    .catch(err => {
+                        console.error('Erreur:', err);
+                        btn.innerHTML = '❌ Erreur';
+                        alert("Erreur lors de l'envoi de la position");
+                        
+                        // Reset button after 3 seconds
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }, 3000);
+                    });
+                },
+                error => {
+                    console.error('Erreur géolocalisation:', error);
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            alert("Vous devez autoriser la géolocalisation pour utiliser cette fonctionnalité.");
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            alert("Impossible d'obtenir votre position.");
+                            break;
+                        case error.TIMEOUT:
+                            alert("Délai dépassé pour obtenir votre position.");
+                            break;
+                        default:
+                            alert("Erreur inconnue lors de la géolocalisation.");
+                    }
+                    
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+        
+        // Auto-refresh for available livreurs
+        function checkForNewOrders() {
+            // You can implement WebSocket or polling here
+            // For now, just log
+            console.log('Checking for new orders...');
+        }
+        
+       
+    </script>
 </body>
 </html>

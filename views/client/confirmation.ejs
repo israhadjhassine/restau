@@ -1,7 +1,50 @@
-<h2>Commande Confirmée</h2>
-<p>ID commande : <%= commande.id_commande %></p>
-<p>Montant payé : <%= paiement.montant %> DT</p>
-<p>Statut paiement : <%= paiement.statut %></p>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation - FoodDelivery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
+        .navbar { background: #e44d26; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; padding: 0.5rem 1rem; border-radius: 4px; transition: background 0.3s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
+        .container { max-width: 600px; margin: 3rem auto; padding: 0 2rem; text-align: center; }
+        .success-icon { font-size: 4rem; color: #4CAF50; margin-bottom: 1rem; }
+        .btn { background: #e44d26; color: white; padding: 12px 30px; border-radius: 5px; text-decoration: none; display: inline-block; margin: 1rem; }
+        .btn:hover { background: #c63d1a; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h2><a href="/" style="color: white; text-decoration: none;">FoodDelivery</a></h2>
+        </div>
+        <div class="nav-links">
+            <a href="/client/restaurants">Restaurants</a>
+            <a href="/client/cart">Panier</a>
+            <a href="/client/home-private">Mon Compte</a>
+            <a href="/logout">Déconnexion</a>
+        </div>
+    </nav>
 
-
-<a href="/client/restaurants">Retour aux restaurants</a>
+    <div class="container">
+        <div class="success-icon">✅</div>
+        <h1>Commande Confirmée !</h1>
+        <p>Merci pour votre commande, <%= user.username %> !</p>
+        
+        <% if (commandeId) { %>
+            <p><strong>Numéro de commande :</strong> #<%= commandeId %></p>
+        <% } %>
+        
+        <p>Votre commande a été enregistrée avec succès.</p>
+        <p>Vous recevrez bientôt un email de confirmation.</p>
+        
+        <div style="margin-top: 2rem;">
+            <a href="/client/restaurants" class="btn">Voir d'autres restaurants</a>
+            <a href="/client/home-private" class="btn" style="background: #333;">Mon compte</a>
+        </div>
+    </div>
+</body>
+</html>

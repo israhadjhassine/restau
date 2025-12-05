@@ -1,138 +1,770 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Dashboard Restaurant</title>
-<style>
-  body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:20px; }
-  h1, h2, h3 { color: #333; }
-  .container { width: 90%; margin: auto; }
-  .card { background:white; padding:20px; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom:20px; }
-  table { width: 100%; border-collapse: collapse; margin-top:10px; }
-  th, td { padding: 10px; border: 1px solid #ddd; text-align:center; }
-  th { background:#333; color:white; }
-  .btn { padding: 6px 12px; border:none; border-radius:5px; cursor:pointer; color:white; transition:0.3s; margin:2px; }
-  .btn.success { background:#28a745; }
-  .btn.success:hover { background:#218838; }
-  .btn.danger { background:#dc3545; }
-  .btn.danger:hover { background:#c82333; }
-  .btn.info { background:#007bff; }
-  .btn.info:hover { background:#0069d9; }
-  input, select, textarea { width:100%; padding:8px; margin:5px 0; border-radius:5px; border:1px solid #ccc; box-sizing:border-box; }
-  textarea { resize: vertical; }
-  .hidden { display:none; }
-</style>
-<script>
-  function toggleForm(id) {
-    const form = document.getElementById(id);
-    form.classList.toggle("hidden");
-    window.scrollTo(0, form.offsetTop - 20);
-  }
-</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - <%= restaurant.nomRestaurant %> - FoodDelivery</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* Navbar Restaurant */
+        .navbar { 
+            background: #27ae60; 
+            padding: 1rem 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: white; 
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        
+        .logo h2 a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+        }
+        
+        .nav-links { 
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .nav-links a { 
+            color: white; 
+            text-decoration: none; 
+            padding: 0.5rem 1rem; 
+            border-radius: 4px; 
+            transition: all 0.3s; 
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .nav-links a:hover { 
+            background: rgba(255,255,255,0.15); 
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a.active { 
+            background: #219653;
+        }
+        
+        .logout-btn {
+            background: #e44d26;
+            padding: 0.5rem 1.5rem;
+            border-radius: 4px;
+        }
+        
+        .logout-btn:hover {
+            background: #c63d1a;
+        }
+        
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            padding-top: 100px;
+        }
+        
+        /* Header */
+        .dashboard-header {
+            margin-bottom: 3rem;
+        }
+        
+        .dashboard-header h1 {
+            color: #27ae60;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dashboard-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            border-left: 5px solid #27ae60;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+        
+        .stat-card h3 {
+            color: #2c3e50;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #27ae60;
+            margin: 0.5rem 0;
+        }
+        
+        .stat-trend {
+            font-size: 0.9rem;
+            color: #27ae60;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        /* Quick Actions */
+        .actions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .actions-header h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            border-color: #27ae60;
+        }
+        
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #27ae60;
+        }
+        
+        .action-card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .action-card p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .action-btn {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid #27ae60;
+            cursor: pointer;
+        }
+        
+        .action-btn:hover {
+            background: white;
+            color: #27ae60;
+        }
+        
+        /* Menus Section */
+        .menus-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-top: 3rem;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .section-header h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Menu Cards */
+        .menu-card {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 2px solid #eee;
+            transition: all 0.3s;
+        }
+        
+        .menu-card:hover {
+            border-color: #27ae60;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .menu-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .menu-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #219653;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d68910;
+            transform: translateY(-2px);
+        }
+        
+        /* Forms */
+        .form-container {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+            border: 2px solid #eee;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #27ae60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* Plats Table */
+        .plats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .plats-table th {
+            background: #f1f8e9;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #27ae60;
+        }
+        
+        .plats-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+        
+        .plats-table tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .plat-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        
+        .no-image {
+            width: 60px;
+            height: 60px;
+            background: #eee;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.8rem;
+        }
+        
+        .plat-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                padding: 1.5rem;
+                padding-top: 90px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .menu-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .menu-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .plats-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dashboard-container {
+                padding: 1rem;
+                padding-top: 80px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <h2><a href="/restaurant"><%= restaurant.nomRestaurant %></a></h2>
+        </div>
+        <div class="nav-links">
+            <a href="/restaurant" class="active">Dashboard</a>
+            <a href="/restaurant/commandes">Commandes</a>
+            <a href="#">Menus</a>
+            <a href="#">Plats</a>
+            <a href="/logout" class="logout-btn">Déconnexion</a>
+        </div>
+    </nav>
 
-<div class="container">
-  <h1>Bienvenue <%= restaurant.nomRestaurant %></h1>
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>Bienvenue, <%= restaurant.nomRestaurant %> 👨‍🍳</h1>
+            <p>Gérez votre restaurant sur FoodDelivery</p>
+        </div>
 
-  <!-- Bouton Ajouter Menu -->
-  <button class="btn success" onclick="toggleForm('menuForm')">Ajouter un Menu</button>
-  
-  <!-- Formulaire Ajouter Menu -->
-  <div id="menuForm" class="card hidden">
-    <h2>Ajouter un Menu</h2>
-    <form action="/restaurant/menus" method="POST">
-      <input type="text" name="titre" placeholder="Titre du menu" required>
-      <button type="submit" class="btn success">Ajouter</button>
-    </form>
-  </div>
+     
+        <div class="actions-grid">
+            <div class="action-card">
+                <div class="action-icon">📋</div>
+                <h3>Voir les commandes</h3>
+                <p>Consultez et gérez toutes vos commandes en cours</p>
+                <a href="/restaurant/commandes" class="action-btn">Voir commandes</a>
+            </div>
+            
+            <div class="action-card">
+                <div class="action-icon">🍽️</div>
+                <h3>Ajouter un plat</h3>
+                <p>Ajoutez un nouveau plat à votre carte</p>
+                <button class="action-btn" onclick="toggleForm('addPlatForm')">Ajouter un plat</button>
+            </div>
+            
+            <div class="action-card">
+                <div class="action-icon">📊</div>
+                <h3>Voir les statistiques</h3>
+                <p>Analysez vos performances et ventes</p>
+                <a href="/restaurant/stats" class="action-btn">Voir stats</a>
+            </div>
+        </div>
 
-  <!-- Liste des Menus -->
-  <% restaurant.menu.forEach(menu => { %>
-    <div class="card">
-      <h2><%= menu.titre %>
-        <!-- Boutons Menu -->
-        <form action="/restaurant/menus/delete/<%= menu._id %>" method="POST" style="display:inline;">
-          <button class="btn danger">Supprimer</button>
-        </form>
-        <button class="btn info" onclick="toggleForm('editMenu<%= menu._id %>')">Modifier</button>
-      </h2>
+        <!-- Add Plat Form -->
+        <div id="addPlatForm" class="form-container hidden">
+            <div class="section-header">
+                <h2>➕ Ajouter un nouveau plat</h2>
+                <button class="btn btn-danger" onclick="toggleForm('addPlatForm')">✕ Fermer</button>
+            </div>
+            
+            <form action="/restaurant/plats" method="POST">
+                <div class="form-group">
+                    <label for="nomPlat">Nom du plat</label>
+                    <input type="text" id="nomPlat" name="nom" placeholder="Ex: Pizza Margherita" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="menuSelect">Menu</label>
+                    <select id="menuSelect" name="menuTitre" required>
+                        <% restaurant.menu.forEach(menu => { %>
+                            <option value="<%= menu.titre %>"><%= menu.titre %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descriptionPlat">Description</label>
+                    <textarea id="descriptionPlat" name="description" placeholder="Décrivez votre plat..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="prixPlat">Prix (DT)</label>
+                    <input type="number" id="prixPlat" name="prix" step="0.01" min="0" placeholder="Ex: 12.50" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="imagePlat">URL de l'image (optionnel)</label>
+                    <input type="text" id="imagePlat" name="image" placeholder="https://exemple.com/image.jpg">
+                </div>
+                
+                <button type="submit" class="btn btn-success">➕ Ajouter le plat</button>
+            </form>
+        </div>
 
-      <!-- Formulaire Modifier Menu -->
-      <div id="editMenu<%= menu._id %>" class="hidden">
-        <form action="/restaurant/menus/edit/<%= menu._id %>" method="POST">
-          <input type="text" name="titre" value="<%= menu.titre %>" required>
-          <button class="btn success">Modifier</button>
-        </form>
-      </div>
-
-      <!-- Bouton Ajouter Plat -->
-      <button class="btn success" onclick="toggleForm('platForm<%= menu._id %>')">Ajouter un Plat</button>
-
-      <!-- Formulaire Ajouter Plat -->
-      <div id="platForm<%= menu._id %>" class="hidden">
-        <form action="/restaurant/plats" method="POST">
-          <input type="text" name="nom" placeholder="Nom du plat" required>
-          <textarea name="description" placeholder="Description" required></textarea>
-          <input type="number" name="prix" placeholder="Prix" required>
-          <input type="text" name="image" placeholder="URL de l'image">
-          <input type="hidden" name="menuTitre" value="<%= menu.titre %>">
-          <button type="submit" class="btn success">Ajouter le plat</button>
-        </form>
-      </div>
-
-      <!-- Liste des Plats -->
-      <h3>Plats :</h3>
-      <% if(menu.plats.length > 0) { %>
-        <table>
-          <tr>
-            <th>Nom</th>
-            <th>Description</th>
-            <th>Prix</th>
-            <th>Image</th>
-            <th>Actions</th>
-          </tr>
-          <% menu.plats.forEach(plat => { %>
-            <tr>
-              <td><%= plat.nom %></td>
-              <td><%= plat.description %></td>
-              <td><%= plat.prix %></td>
-              <td>
-                <% if(plat.image) { %>
-                  <img src="<%= plat.image %>" width="50">
-                <% } else { %>
-                  -
-                <% } %>
-              </td>
-              <td>
-                <form action="/restaurant/plats/delete/<%= plat._id %>" method="POST" style="display:inline;">
-                  <button class="btn danger">Supprimer</button>
+        <!-- Menus Section -->
+        <div class="menus-section">
+            <div class="section-header">
+                <h2>📚 Vos menus</h2>
+                <button class="btn btn-success" onclick="toggleForm('addMenuForm')">➕ Ajouter un menu</button>
+            </div>
+            
+            <!-- Add Menu Form -->
+            <div id="addMenuForm" class="form-container hidden">
+                <form action="/restaurant/menus" method="POST">
+                    <div class="form-group">
+                        <label for="titreMenu">Titre du menu</label>
+                        <input type="text" id="titreMenu" name="titre" placeholder="Ex: Entrées, Plats principaux, Desserts..." required>
+                    </div>
+                    <button type="submit" class="btn btn-success">➕ Créer le menu</button>
                 </form>
-                <button class="btn info" onclick="toggleForm('editPlat<%= plat._id %>')">Modifier</button>
-              </td>
-            </tr>
-
-            <!-- Formulaire Modifier Plat -->
-            <tr id="editPlat<%= plat._id %>" class="hidden">
-              <td colspan="5">
-                <form action="/restaurant/plats/edit/<%= plat._id %>" method="POST">
-                  <input type="text" name="nom" value="<%= plat.nom %>" required>
-                  <textarea name="description" required><%= plat.description %></textarea>
-                  <input type="number" name="prix" value="<%= plat.prix %>" required>
-                  <input type="text" name="image" value="<%= plat.image %>">
-                  <button class="btn success">Modifier</button>
-                </form>
-              </td>
-            </tr>
-
-          <% }) %>
-        </table>
-      <% } else { %>
-        <p>Aucun plat pour ce menu.</p>
-      <% } %>
+            </div>
+            
+            <!-- Menus List -->
+            <% if (restaurant.menu && restaurant.menu.length > 0) { %>
+                <% restaurant.menu.forEach(menu => { %>
+                    <div class="menu-card">
+                        <div class="menu-header">
+                            <div class="menu-title">🍽️ <%= menu.titre %></div>
+                            <div class="menu-actions">
+                                <button class="btn btn-warning" onclick="toggleForm('editMenu<%= menu._id %>')">
+                                    ✏️ Modifier
+                                </button>
+                                <form action="/restaurant/menus/delete/<%= menu._id %>" method="POST" style="display: inline;">
+                                    <button class="btn btn-danger" onclick="return confirm('Supprimer ce menu et tous ses plats ?')">
+                                        🗑 Supprimer
+                                    </button>
+                                </form>
+                                <button class="btn btn-success" onclick="toggleForm('addPlatToMenu<%= menu._id %>')">
+                                    ➕ Ajouter plat
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Edit Menu Form -->
+                        <div id="editMenu<%= menu._id %>" class="form-container hidden">
+                            <form action="/restaurant/menus/edit/<%= menu._id %>" method="POST">
+                                <div class="form-group">
+                                    <label for="titreMenuEdit<%= menu._id %>">Titre du menu</label>
+                                    <input type="text" id="titreMenuEdit<%= menu._id %>" name="titre" value="<%= menu.titre %>" required>
+                                </div>
+                                <button type="submit" class="btn btn-success">💾 Enregistrer</button>
+                            </form>
+                        </div>
+                        
+                        <!-- Add Plat to Menu Form -->
+                        <div id="addPlatToMenu<%= menu._id %>" class="form-container hidden">
+                            <form action="/restaurant/plats" method="POST">
+                                <input type="hidden" name="menuTitre" value="<%= menu.titre %>">
+                                <div class="form-group">
+                                    <label>Nom du plat</label>
+                                    <input type="text" name="nom" placeholder="Ex: Salade César" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <textarea name="description" placeholder="Décrivez votre plat..." required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Prix (DT)</label>
+                                    <input type="number" name="prix" step="0.01" min="0" placeholder="Ex: 15.00" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>URL de l'image (optionnel)</label>
+                                    <input type="text" name="image" placeholder="https://exemple.com/image.jpg">
+                                </div>
+                                <button type="submit" class="btn btn-success">➕ Ajouter au menu</button>
+                            </form>
+                        </div>
+                        
+                        <!-- Plats List -->
+                        <% if (menu.plats && menu.plats.length > 0) { %>
+                            <table class="plats-table">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Nom</th>
+                                        <th>Description</th>
+                                        <th>Prix</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% menu.plats.forEach(plat => { %>
+                                        <tr>
+                                            <td>
+                                                <% if (plat.image) { %>
+                                                    <img src="<%= plat.image %>" alt="<%= plat.nom %>" class="plat-image">
+                                                <% } else { %>
+                                                    <div class="no-image">Pas d'image</div>
+                                                <% } %>
+                                            </td>
+                                            <td><strong><%= plat.nom %></strong></td>
+                                            <td><%= plat.description %></td>
+                                            <td><strong><%= plat.prix %> DT</strong></td>
+                                            <td>
+                                                <div class="plat-actions">
+                                                    <button class="btn btn-warning" onclick="toggleForm('editPlat<%= plat._id %>')">
+                                                        ✏️
+                                                    </button>
+                                                    <form action="/restaurant/plats/delete/<%= plat._id %>" method="POST" style="display: inline;">
+                                                        <button class="btn btn-danger" onclick="return confirm('Supprimer ce plat ?')">
+                                                            🗑
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Edit Plat Form -->
+                                        <tr id="editPlat<%= plat._id %>" class="hidden">
+                                            <td colspan="5">
+                                                <div class="form-container">
+                                                    <form action="/restaurant/plats/edit/<%= plat._id %>" method="POST">
+                                                        <div class="form-group">
+                                                            <label>Nom du plat</label>
+                                                            <input type="text" name="nom" value="<%= plat.nom %>" required>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Description</label>
+                                                            <textarea name="description" required><%= plat.description %></textarea>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Prix (DT)</label>
+                                                            <input type="number" name="prix" step="0.01" min="0" value="<%= plat.prix %>" required>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>URL de l'image</label>
+                                                            <input type="text" name="image" value="<%= plat.image || '' %>" placeholder="https://exemple.com/image.jpg">
+                                                        </div>
+                                                        <button type="submit" class="btn btn-success">💾 Enregistrer</button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <div class="empty-icon">🍽️</div>
+                                <p>Aucun plat dans ce menu</p>
+                                <button class="btn btn-success" onclick="toggleForm('addPlatToMenu<%= menu._id %>')">
+                                    ➕ Ajouter votre premier plat
+                                </button>
+                            </div>
+                        <% } %>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="empty-state">
+                    <div class="empty-icon">📚</div>
+                    <h3>Aucun menu créé</h3>
+                    <p>Commencez par créer votre premier menu</p>
+                    <button class="btn btn-success" onclick="toggleForm('addMenuForm')">
+                        ➕ Créer mon premier menu
+                    </button>
+                </div>
+            <% } %>
+        </div>
     </div>
-  <% }) %>
-</div>
 
+    <script>
+        function toggleForm(id) {
+            const form = document.getElementById(id);
+            form.classList.toggle("hidden");
+            if (!form.classList.contains("hidden")) {
+                form.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
 </body>
 </html>

@@ -30,13 +30,14 @@
             <h2><a href="/" style="color: white; text-decoration: none;">FoodDelivery</a></h2>
         </div>
         <div class="nav-links">
-            <a href="/">Accueil</a>
             <a href="/client/restaurants">Restaurants</a>
             <% if (user) { %>
+                <!-- Logged in user -->
                 <a href="/client/cart">Panier <span class="cart-indicator" id="cartCount"><%= cart ? cart.length : 0 %></span></a>
-                <a href="/client/dashboard">Mon Compte</a>
+                <a href="/client/home-private">Mon Compte</a>
                 <a href="/logout">Déconnexion</a>
             <% } else { %>
+                <!-- Guest user -->
                 <a href="/login">Connexion</a>
                 <a href="/signup">Inscription</a>
             <% } %>
@@ -62,11 +63,11 @@
                             <p><%= plat.description %></p>
                         </div>
                         <div style="display: flex; align-items: center;">
-                            <span class="item-price"><%= plat.prix %> €</span>
-                          <button class="add-to-cart" 
-        onclick='addToCart("<%= plat._id %>", "<%= plat.nom %>", "<%= plat.prix %>", "<%= restaurant._id %>", "<%= restaurant.nomRestaurant %>")'>
-    Ajouter
-</button>
+                            <span class="item-price"><%= plat.prix %> DT</span>
+                            <button class="add-to-cart" 
+                                onclick='addToCart("<%= plat._id %>", "<%= plat.nom %>", "<%= plat.prix %>", "<%= restaurant._id %>", "<%= restaurant.nomRestaurant %>")'>
+                                Ajouter
+                            </button>
                         </div>
                     </div>
                 <% }); %>
@@ -76,11 +77,18 @@
         <% } %>
     </div>
 
-    <!-- Cart Summary -->
+    <!-- Cart Summary (only show if user has items in cart) -->
     <% if (cart && cart.length > 0) { %>
         <div class="cart-summary" onclick="viewCart()">
             <strong>Panier: <%= cart.length %> article(s)</strong><br>
-            Total: <%= cart.reduce(function(sum, item) { return sum + (item.price * item.quantity); }, 0).toFixed(2) %> €
+            <% 
+                const total = cart.reduce(function(sum, item) { 
+                    const price = parseFloat(item.price || item.prix || 0);
+                    const quantity = parseInt(item.quantity || item.quantite || 1);
+                    return sum + (price * quantity); 
+                }, 0);
+            %>
+            Total: <%= total.toFixed(2) %> DT
         </div>
     <% } %>
 
@@ -88,50 +96,74 @@
     <div class="notification" id="notification"></div>
 
     <script>
-       function addToCart(itemId, name, price, restaurantId, restaurantName) {
-    // Parse the price from string to number
-    const parsedPrice = parseFloat(price);
-    
-    fetch('/client/cart/add', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            itemId: itemId,
-            nom: name,
-            prix: parsedPrice,
-            restaurantId: restaurantId,
-            nomRestaurant: restaurantName
-        })
-    })
-    .then(function(response) {
-        return response.json();
-    })
-    .then(function(data) {
-        if (data.success) {
-            showNotification(data.message);
-            updateCartCount(data.cart ? data.cart.length : 0);
+        function addToCart(itemId, name, price, restaurantId, restaurantName) {
+            console.log("Adding to cart:", { itemId, name, price, restaurantId, restaurantName });
             
-            if (data.cart && data.cart.length > 0 && !document.querySelector('.cart-summary')) {
-                createCartSummary(data.cart);
-            }
-        } else if (data.needConfirmation) {
-            if (confirm(data.message)) {
-                fetch('/client/cart/clear', { method: 'POST' })
-                    .then(function() {
-                        addToCart(itemId, name, parsedPrice, restaurantId, restaurantName);
-                    });
-            }
-        } else {
-            alert(data.message);
+            fetch('/client/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    itemId: itemId,
+                    nom: name,
+                    prix: parseFloat(price),
+                    restaurantId: restaurantId,
+                    nomRestaurant: restaurantName,
+                    quantite: 1
+                })
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                console.log("Add to cart response:", data);
+                if (data.success) {
+                    showNotification(data.message || "Article ajouté au panier !");
+                    updateCartCount(data.cartCount || data.cart?.length || 0);
+                    
+                    // Update cart summary if it exists
+                    updateCartSummary(data.cart);
+                } else if (data.needConfirmation) {
+                    if (confirm(data.message)) {
+                        fetch('/client/cart/clear', { method: 'POST' })
+                            .then(function() {
+                                // Retry adding after clearing
+                                addToCart(itemId, name, price, restaurantId, restaurantName);
+                            });
+                    }
+                } else {
+                    alert(data.message || 'Erreur lors de l\'ajout au panier');
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                alert('Erreur de connexion au serveur');
+            });
         }
-    })
-    .catch(function(error) {
-        console.error('Error:', error);
-        alert('Erreur lors de l\'ajout au panier');
-    });
-}
+        
+        function updateCartSummary(cart) {
+            if (cart && cart.length > 0) {
+                const total = cart.reduce(function(sum, item) {
+                    const price = parseFloat(item.price || item.prix || 0);
+                    const quantity = parseInt(item.quantity || item.quantite || 1);
+                    return sum + (price * quantity);
+                }, 0);
+                
+                let summary = document.querySelector('.cart-summary');
+                if (!summary) {
+                    summary = document.createElement('div');
+                    summary.className = 'cart-summary';
+                    summary.onclick = viewCart;
+                    document.body.appendChild(summary);
+                }
+                summary.innerHTML = `<strong>Panier: ${cart.length} article(s)</strong><br>Total: ${total.toFixed(2)} DT`;
+            }
+        }
+
         function showNotification(message) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -148,23 +180,8 @@
             }
         }
 
-        function createCartSummary(cart) {
-            const total = cart.reduce(function(sum, item) {
-                return sum + (item.price * item.quantity);
-            }, 0);
-            const summary = document.createElement('div');
-            summary.className = 'cart-summary';
-            summary.innerHTML = '<strong>Panier: ' + cart.length + ' article(s)</strong><br>Total: ' + total.toFixed(2) + ' €';
-            summary.onclick = viewCart;
-            document.body.appendChild(summary);
-        }
-
         function viewCart() {
             window.location.href = '/client/cart';
-        }
-
-        function viewRestaurants() {
-            window.location.href = '/client/restaurants';
         }
     </script>
 </body>

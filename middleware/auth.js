@@ -1,30 +1,43 @@
 const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
- /* const token = req.header("Authorization")?.split(" ")[1];
-  if (!token) return res.status(401).send("Connectez-vous d'abord");*/
-
-  const token = req.cookies?.token; // 🔹 récupérer depuis cookie
-  if (!token) return res.redirect("/login");
+  // Get token from cookie
+  const token = req.cookies?.token;
+  
+  if (!token) {
+    // No token - redirect to login with return URL
+    if (req.originalUrl !== '/login' && req.originalUrl !== '/signup') {
+      req.session.returnTo = req.originalUrl;
+    }
+    return res.redirect("/login");
+  }
 
   try {
+    // Verify token
+    const secret = process.env.JWT_SECRET || "SECRET";
+    const decoded = jwt.verify(token, secret);
     
-    req.user = jwt.verify(token, "SECRET");
-     
-
-    // ⚡ Adapter le payload pour avoir l'_id MongoDB
-    /*req.user = {
-      _id: decoded._id , // prend l'un ou l'autre
-      username: decoded.username
-    };*/
-
-    console.log("Utilisateur connecté :", req.user);
-
-
+    // Attach user to request
+    req.user = decoded;
+    
+    // Check account status based on role
+    if (req.user.role !== "Client" && req.user.statut === "en_attente") {
+      console.log(`Account ${req.user.username} (${req.user.role}) is pending approval`);
+      res.clearCookie("token");
+      return res.redirect("/login?error=Votre compte est en attente de validation");
+    }
+    
+    if (req.user.statut === "bloque") {
+      console.log(`Account ${req.user.username} is blocked`);
+      res.clearCookie("token");
+      return res.redirect("/login?error=Votre compte est bloqué");
+    }
+    
+    console.log(`✅ Authenticated: ${req.user.username} (${req.user.role})`);
     next();
   } catch (err) {
-    res.status(400).send("Token invalide");
-
-    
+    console.log("❌ JWT verification failed:", err.message);
+    res.clearCookie("token");
+    return res.redirect("/login?error=Session invalide ou expirée");
   }
 };

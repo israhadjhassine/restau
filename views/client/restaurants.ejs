@@ -5,13 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurants - FoodDelivery</title>
     <style>
-        /* Same styles as home page */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
         .navbar { background: #e44d26; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; }
-        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; padding: 0.5rem 1rem; border-radius: 4px; transition: background 0.3s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
         .section { padding: 2rem; max-width: 1200px; margin: 0 auto; }
-        .restaurant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
-        .restaurant-card { border: 1px solid #ddd; border-radius: 10px; padding: 1.5rem; cursor: pointer; }
-        .restaurant-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .restaurant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem; }
+        .restaurant-card { border: 1px solid #ddd; border-radius: 10px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; }
+        .restaurant-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .restaurant-image { height: 200px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #666; }
+        .restaurant-info { padding: 1.5rem; }
+        .search-bar { margin: 2rem 0; text-align: center; }
+        .search-input { padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 5px; }
+        .search-btn { background: #e44d26; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -20,13 +27,14 @@
             <h2><a href="/" style="color: white; text-decoration: none;">FoodDelivery</a></h2>
         </div>
         <div class="nav-links">
-            <a href="/">Accueil</a>
             <a href="/client/restaurants">Restaurants</a>
             <% if (user) { %>
+                <!-- Logged in user -->
                 <a href="/client/cart">Panier</a>
-                <a href="/client/dashboard">Mon Compte</a>
+                <a href="/client/home-private">Mon Compte</a>
                 <a href="/logout">Déconnexion</a>
             <% } else { %>
+                <!-- Guest user -->
                 <a href="/login">Connexion</a>
                 <a href="/signup">Inscription</a>
             <% } %>
@@ -35,20 +43,42 @@
 
     <div class="section">
         <h1>Tous les Restaurants</h1>
+        
+        <!-- Search bar -->
+        <div class="search-bar">
+            <form action="/client/restaurants" method="GET">
+                <input type="text" name="q" placeholder="Rechercher un restaurant..." class="search-input">
+                <button type="submit" class="search-btn">Rechercher</button>
+            </form>
+        </div>
+        
         <div class="restaurant-grid">
-          <!-- In the restaurant loop, update to use your model fields -->
-<% restaurants.forEach(function(restaurant) { %>
-    <div class="restaurant-card" onclick="viewMenu('<%= restaurant._id %>')">
-        <div class="restaurant-image">
-            <span>Image du restaurant</span>
-        </div>
-        <div class="restaurant-info">
-            <h3><%= restaurant.nomRestaurant %></h3>
-            <p><strong>Adresse:</strong> <%= restaurant.adresse %></p>
-            <p><strong>Téléphone:</strong> <%= restaurant.telephone %></p>
-        </div>
-    </div>
-<% }); %>
+            <% if (restaurants && restaurants.length > 0) { %>
+                <% restaurants.forEach(function(restaurant) { %>
+                    <div class="restaurant-card" onclick="viewMenu('<%= restaurant._id %>')">
+                        <div class="restaurant-image">
+                            <span>Image du restaurant</span>
+                        </div>
+                        <div class="restaurant-info">
+                            <h3><%= restaurant.nomRestaurant %></h3>
+                            <p><strong>Adresse:</strong> <%= restaurant.adresse %></p>
+                            <p><strong>Téléphone:</strong> <%= restaurant.telephone %></p>
+                            <p style="margin-top: 10px;">
+                                <a href="/client/menu/<%= restaurant._id %>" style="color: #e44d26; font-weight: bold;">
+                                    Voir le menu →
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                    <p style="font-size: 1.2rem; color: #666;">Aucun restaurant trouvé.</p>
+                    <a href="/client/restaurants" style="color: #e44d26; font-weight: bold;">
+                        Voir tous les restaurants
+                    </a>
+                </div>
+            <% } %>
         </div>
     </div>
 

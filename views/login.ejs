@@ -1,79 +1,225 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <title>Connexion</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: #f4f4f4;
-    }
-    form {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    input {
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      background: #333;
-      color: white;
-      cursor: pointer;
-    }
-    a {
-      text-align: center;
-      margin-top: 10px;
-      text-decoration: none;
-      color: #333;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - FoodDelivery</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Navbar - Same as other pages */
+        .navbar { 
+            background: #e44d26; 
+            padding: 1rem 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: white; 
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .logo h2 a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .nav-links a { 
+            color: white; 
+            text-decoration: none; 
+            margin-left: 2rem; 
+            padding: 0.5rem 1rem; 
+            border-radius: 4px; 
+            transition: background 0.3s; 
+        }
+        
+        .nav-links a:hover { 
+            background: rgba(255,255,255,0.2); 
+        }
+        
+        /* Login Container */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            padding-top: 80px; /* Account for fixed navbar */
+        }
+        
+        .login-box {
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 450px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .login-box h2 {
+            color: #e44d26;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            border-bottom: 3px solid #e44d26;
+            padding-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #f9f9f9;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #e44d26;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(228, 77, 38, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #e44d26;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            background: #c63d1a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(228, 77, 38, 0.3);
+        }
+        
+        .links {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .links a {
+            color: #e44d26;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .links a:hover {
+            color: #c63d1a;
+            text-decoration: underline;
+        }
+        
+        .signup-link {
+            display: block;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-box {
+                padding: 2rem;
+            }
+            
+            .navbar {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
-<% if (query.attente == 1) { %>
-<script>
-Swal.fire({
-    title: "Inscription en attente",
-    text: "Votre compte doit être validé par un administrateur.",
-    icon: "info",
-    confirmButtonText: "OK",
-    confirmButtonColor: "#6c63ff",
-    background: "#fff",
-    color: "#333",
-    showClass: {
-        popup: "swal2-noanimation",
-        backdrop: "swal2-noanimation"
-    }
-});
-</script>
-<% } %>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <h2><a href="/">FoodDelivery</a></h2>
+        </div>
+        <div class="nav-links">
+            <a href="/">Accueil</a>
+            <a href="/login">Connexion</a>
+            <a href="/signup">S'inscrire</a>
+        </div>
+    </nav>
 
+    <% if (query.attente == 1) { %>
+    <script>
+    Swal.fire({
+        title: "Inscription en attente",
+        text: "Votre compte doit être validé par un administrateur.",
+        icon: "info",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#e44d26",
+        background: "#fff",
+        color: "#333",
+    });
+    </script>
+    <% } %>
 
-
-<form action="/login" method="POST">
-    <h2>Connexion</h2>
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Mot de passe" required>
-    <button type="submit">Se connecter</button>
-    <a href="/signup">Créer un compte</a>
-</form>
-
+    <div class="login-container">
+        <div class="login-box">
+            <h2>Connexion</h2>
+            <form action="/login" method="POST">
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" placeholder="Mot de passe" required>
+                </div>
+                <button type="submit" class="btn">Se connecter</button>
+                
+                <div class="links">
+                    <a href="/signup" class="signup-link">Créer un compte</a>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

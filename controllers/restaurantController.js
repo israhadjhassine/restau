@@ -138,3 +138,94 @@ exports.modifierPlat = async (req, res) => {
   }
 };
 
+const Commande = require("../models/Commande");
+const Livreur = require("../models/Livreur");
+
+exports.getCommandesEnAttente = async (req, res) => {
+  try {
+    const commandes = await Commande.find({ statut: "EN_ATTENTE" })
+      .populate("client")
+      .populate("plats");
+    res.render("restaurant/commande", { commandes });
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+};
+
+exports.getLivreursDisponibles = async (req, res) => {
+  try {
+    const livreurs = await Livreur.find({ disponible: true ,  statut: "valide"});
+    res.json(livreurs);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+};
+
+/*exports.accepterCommande = async (req, res) => {
+  try {
+    const { commandeId, livreurId } = req.body;
+    await Commande.findByIdAndUpdate(commandeId, {
+      statut: "ACCEPTEE",
+      livreur: livreurId
+    });
+    await Livreur.findByIdAndUpdate(livreurId, { disponible: false });
+    res.sendStatus(200);
+    
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+};*/
+const { sendEmail } = require("../utils/mailer");
+exports.accepterCommande = async (req, res) => {
+  try {
+    const { commandeId, livreurId } = req.body;
+
+    // 1️⃣ Récupérer commande + client
+    const commande = await Commande.findById(commandeId).populate("client");
+    if (!commande) return res.status(404).send("Commande introuvable");
+
+    // 2️⃣ Récupérer livreur
+    const livreur = await Livreur.findById(livreurId);
+    if (!livreur) return res.status(404).send("Livreur introuvable");
+
+    // 3️⃣ Mettre à jour commande + livreur
+    commande.statut = "EN_LIVRAISON";
+    commande.livreur = livreurId;
+    await commande.save();
+
+    livreur.disponible = false;
+    await livreur.save();
+
+    // 4️⃣ ENVOI DES EMAILS
+    await sendEmail(
+      commande.client.email,
+      "Commande acceptée",
+      `Bonjour ${commande.client.username},
+
+Votre commande numéro #${commande. plats} a été acceptée.
+Un livreur va vous contacter et la livraison commencera bientôt.
+
+Merci pour votre confiance.`
+    );
+
+    await sendEmail(
+         livreur.email,
+      "Nouvelle commande à livrer",
+      `Bonjour ${livreur.username},
+
+Une nouvelle commande vous a été attribuée.
+Numéro de commande : #${commande.id_commande}.
+
+Veuillez vous préparer pour la livraison.`
+    );
+
+    // 5️⃣ Réponse finale
+    res.send("Commande acceptée et emails envoyés !");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err.message);
+  }
+};
+
+
+

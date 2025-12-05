@@ -1,44 +1,433 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Commandes Livreur</title>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Commandes - FoodDelivery Livreur</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: #f8f9fa;
+            color: #333;
+        }
+        
+        /* Navbar */
+        .navbar { 
+            background: #3498db; 
+            padding: 1rem 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: white; 
+        }
+        
+        .logo h2 a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+        }
+        
+        .nav-links a { 
+            color: white; 
+            text-decoration: none; 
+            margin-left: 1.5rem; 
+            padding: 0.5rem 1rem; 
+            border-radius: 4px; 
+            transition: background 0.3s; 
+        }
+        
+        .nav-links a:hover { 
+            background: rgba(255,255,255,0.2); 
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Header */
+        .header {
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            color: #3498db;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+            margin: 0.5rem 0;
+        }
+        
+        /* Orders Grid */
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .order-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .order-id {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .order-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-delivering {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .status-delivered {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Button */
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin: 0.3rem;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background: #219653;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        /* Form */
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        /* Order Details */
+        .order-details {
+            margin: 1rem 0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.3rem 0;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .detail-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .items-list {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #eee;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-<h1>📦 Commandes assignées</h1>
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="logo">
+        <h2><a href="/livreur">FoodDelivery Livreur</a></h2>
+    </div>
+    <div class="nav-links">
+        <a href="/livreur/dashboard">Dashboard</a>
+        <a href="/livreur/commandes">Mes commandes</a>
+        <a href="/logout">Déconnexion</a>
+    </div>
+</nav>
 
-<% if (commandes.length === 0) { %>
-    <p>Aucune commande pour le moment.</p>
-<% } %>
+<!-- Main Content -->
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1> Mes commandes assignées</h1>
+        <p>Gérez vos livraisons</p>
+    </div>
 
-<% commandes.forEach(cmd => { %>
-<div class="card">
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat-card">
+            <div>Total commandes</div>
+            <div class="stat-value">
+                <% if (commandes && commandes.length) { %>
+                    <%= commandes.length %>
+                <% } else { %>
+                    0
+                <% } %>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div>En livraison</div>
+            <div class="stat-value">
+                <% 
+                let deliveringCount = 0;
+                if (commandes) {
+                    commandes.forEach(c => {
+                        if (c.statut === 'EN_LIVRAISON') deliveringCount++;
+                    });
+                }
+                %>
+                <%= deliveringCount %>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div>Gains estimés</div>
+            <div class="stat-value">
+                <% 
+                let totalEarnings = 0;
+                if (commandes) {
+                    commandes.forEach(c => {
+                        totalEarnings += (c.montantTotal || 0) * 0.2;
+                    });
+                }
+                %>
+                <%= totalEarnings.toFixed(2) %> DT
+            </div>
+        </div>
+    </div>
 
-    <h2>Commande #<%= cmd.id_commande %></h2>
-
-    <p><strong>Client :</strong> <%= cmd.client.username %></p>
-    <p><strong>Montant :</strong> <%= cmd.montantTotal %> DT</p>
-    <p><strong>Statut :</strong> <%= cmd.statut %></p>
-
-    <h3>Plats :</h3>
-    <ul>
-        <% cmd.plats.forEach(pl => { %>
-            <li><%= pl.nom %> — <%= pl.prix %> DT</li>
-        <% }) %>
-    </ul>
-
-    <form action="/livreur/commande/<%= cmd._id %>/statut" method="POST">
-        <select name="statut">
-            <option value="EN_LIVRAISON">En livraison</option>
-            <option value="LIVREE">Livrée</option>
-            <option value="ANNULEE">Annulée</option>
-        </select>
-        <button type="submit">Mettre à jour</button>
-    </form>
-
+    <!-- Orders -->
+    <div class="orders-grid">
+        <% if (commandes && commandes.length > 0) { %>
+            <% commandes.forEach(cmd => { %>
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-id">Commande #<%= cmd.id_commande || cmd._id %></div>
+                        <div class="order-status 
+                            <% if (cmd.statut === 'EN_LIVRAISON') { %>status-delivering
+                            <% } else if (cmd.statut === 'LIVREE') { %>status-delivered
+                            <% } else if (cmd.statut === 'ANNULEE') { %>status-cancelled
+                            <% } else { %>status-pending<% } %>">
+                            <% if (cmd.statut === 'EN_LIVRAISON') { %>
+                                En livraison
+                            <% } else if (cmd.statut === 'LIVREE') { %>
+                                Livrée
+                            <% } else if (cmd.statut === 'ANNULEE') { %>
+                                Annulée
+                            <% } else { %>
+                                En attente
+                            <% } %>
+                        </div>
+                    </div>
+                    
+                    <div class="order-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Montant:</span>
+                            <span class="detail-value"><%= cmd.montantTotal || 0 %> DT</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Client:</span>
+                            <span class="detail-value">
+                                <% if (cmd.client && cmd.client.username) { %>
+                                    <%= cmd.client.username %>
+                                <% } else { %>
+                                    Non spécifié
+                                <% } %>
+                            </span>
+                        </div>
+                        <% if (cmd.createdAt) { %>
+                        <div class="detail-row">
+                            <span class="detail-label">Date:</span>
+                            <span class="detail-value">
+                                <%= new Date(cmd.createdAt).toLocaleDateString('fr-FR') %>
+                            </span>
+                        </div>
+                        <% } %>
+                        <div class="detail-row">
+                            <span class="detail-label">Gain:</span>
+                            <span class="detail-value" style="color: #27ae60;">
+                                <%= ((cmd.montantTotal || 0) * 0.2).toFixed(2) %> DT
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Items -->
+                    <div class="items-list">
+                        <div style="font-weight: bold; margin-bottom: 0.5rem;">Articles:</div>
+                        <% if (cmd.plats && cmd.plats.length > 0) { %>
+                            <% cmd.plats.forEach(pl => { %>
+                                <div class="item">
+                                    <span><%= pl.nom %></span>
+                                    <span><%= pl.prix %> DT</span>
+                                </div>
+                            <% }) %>
+                        <% } else if (cmd.items && cmd.items.length > 0) { %>
+                            <% cmd.items.forEach(item => { %>
+                                <div class="item">
+                                    <span><%= item.nom %></span>
+                                    <span><%= item.prix %> DT</span>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div style="color: #666; text-align: center; padding: 0.5rem;">
+                                Détails non disponibles
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <div class="total-row">
+                        <span>Total:</span>
+                        <span><%= cmd.montantTotal || 0 %> DT</span>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div style="margin-top: 1rem;">
+                        <form action="/livreur/commande/<%= cmd._id %>/statut" method="POST">
+                            <select name="statut">
+                                <option value="EN_LIVRAISON">En livraison</option>
+                                <option value="LIVREE">Livrée</option>
+                                <option value="ANNULEE">Annulée</option>
+                            </select>
+                            <button type="submit" class="btn" style="width: 100%; margin-top: 0.5rem;">
+                                Mettre à jour
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="empty-state">
+                <h3>Aucune commande assignée</h3>
+                <p>Vous n'avez pas de commandes pour le moment.</p>
+            </div>
+        <% } %>
+    </div>
 </div>
-<% }) %>
+
+<script>
+    // Confirm before changing status to cancelled
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('select[name="statut"]').forEach(select => {
+            select.addEventListener('change', function() {
+                if (this.value === 'ANNULEE') {
+                    if (!confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) {
+                        this.value = '';
+                    }
+                }
+            });
+        });
+    });
+</script>
 
 </body>
 </html>

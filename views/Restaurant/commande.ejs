@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commandes - FoodDelivery</title>
+<style>
+    * { 
+        margin: 0; 
+        padding: 0; 
+        box-sizing: border-box; 
+        font-family: 'Arial', sans-serif;
+    }
+    
+    body {
+        background: #f8f9fa;
+        color: #333;
+    }
+    
+    /* Navbar */
+    .navbar { 
+        background: #27ae60; 
+        padding: 1rem 2rem; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        color: white; 
+    }
+    
+    .logo h2 a {
+        color: white;
+        text-decoration: none;
+        font-size: 1.5rem;
+    }
+    
+    .nav-links a { 
+        color: white; 
+        text-decoration: none; 
+        margin-left: 1.5rem; 
+        padding: 0.5rem 1rem; 
+        border-radius: 4px; 
+        transition: background 0.3s; 
+    }
+    
+    .nav-links a:hover { 
+        background: rgba(255,255,255,0.2); 
+    }
+    
+    /* Container */
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    /* Header */
+    .header {
+        margin-bottom: 2rem;
+    }
+    
+    .header h1 {
+        color: #27ae60;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Stats */
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #27ae60;
+        margin: 0.5rem 0;
+    }
+    
+    /* Order Cards */
+    .orders-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .order-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        border-left: 5px solid #27ae60;
+    }
+    
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .order-id {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .order-status {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-accepted {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .status-delivered {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    /* Button */
+    .btn {
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        background: #27ae60;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin: 0.3rem;
+        transition: background 0.3s;
+    }
+    
+    .btn:hover {
+        background: #219653;
+    }
+    
+    .btn-danger {
+        background: #e74c3c;
+    }
+    
+    .btn-danger:hover {
+        background: #c0392b;
+    }
+    
+    /* Form */
+    .assign-form {
+        background: #f8f9fa;
+        border-radius: 5px;
+        padding: 1rem;
+        margin-top: 1rem;
+        display: none;
+    }
+    
+    select {
+        width: 100%;
+        padding: 0.5rem;
+        margin: 0.5rem 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="logo">
+        <h2><a href="/restaurant">FoodDelivery Restaurant</a></h2>
+    </div>
+    <div class="nav-links">
+        <a href="/restaurant/home">Dashboard</a>
+        <a href="/restaurant/commandes">Commandes</a>
+        <a href="/logout">Déconnexion</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>Commandes en attente</h1>
+        <p>Gérez les commandes de votre restaurant</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat-card">
+            <div>Total commandes</div>
+            <div class="stat-value"><%= commandes ? commandes.length : 0 %></div>
+        </div>
+        <div class="stat-card">
+            <div>En attente</div>
+            <div class="stat-value">
+                <% 
+                let pendingCount = 0;
+                if (commandes) {
+                    commandes.forEach(c => {
+                        if (c.statut === 'EN_ATTENTE') pendingCount++;
+                    });
+                }
+                %>
+                <%= pendingCount %>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div>Revenu total</div>
+            <div class="stat-value">
+                <% 
+                let total = 0;
+                if (commandes) {
+                    commandes.forEach(c => {
+                        total += c.montantTotal || 0;
+                    });
+                }
+                %>
+                <%= total.toFixed(2) %> DT
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders -->
+    <div class="orders-grid">
+        <% if (commandes && commandes.length > 0) { %>
+            <% commandes.forEach(commande => { %>
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-id">Commande #<%= commande.id_commande || commande._id %></div>
+                        <div class="order-status status-<%= commande.statut === 'EN_ATTENTE' ? 'pending' : 'accepted' %>">
+                            <%= commande.statut === 'EN_ATTENTE' ? 'En attente' : 'Acceptée' %>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <div><strong>Client:</strong> <%= commande.client && commande.client.username ? commande.client.username : 'Non spécifié' %></div>
+                        <div><strong>Total:</strong> <%= commande.montantTotal || 0 %> DT</div>
+                        <% if (commande.createdAt) { %>
+                            <div><strong>Date:</strong> <%= new Date(commande.createdAt).toLocaleDateString('fr-FR') %></div>
+                        <% } %>
+                    </div>
+                    
+                    <% if (commande.statut === 'EN_ATTENTE') { %>
+                        <div>
+                            <button class="btn" onclick="showAssignForm('<%= commande._id %>')">
+                                ✅ Accepter
+                            </button>
+                            <form action="/restaurant/commandes/refuser/<%= commande._id %>" method="POST" style="display:inline;">
+                                <button class="btn btn-danger" onclick="return confirm('Refuser cette commande ?')">
+                                    ❌ Refuser
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div id="assignForm-<%= commande._id %>" class="assign-form">
+                            <select id="livreur-<%= commande._id %>">
+                                <option value="">Chargement des livreurs...</option>
+                            </select>
+                            <button class="btn" onclick="assignLivreur('<%= commande._id %>')">
+                                🚀 Assigner et accepter
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="empty-state">
+                <h3>Aucune commande en attente</h3>
+                <p>Vous n'avez pas de commandes pour le moment.</p>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    // Load livreurs for each order
+    async function loadLivreurs() {
+        try {
+            const res = await fetch("/restaurant/livreurs/disponibles");
+            if (!res.ok) throw new Error('Erreur réseau');
+            
+            const livreurs = await res.json();
+            
+            // Update all select elements
+            document.querySelectorAll('select[id^="livreur-"]').forEach(select => {
+                select.innerHTML = '';
+                
+                if (livreurs && livreurs.length > 0) {
+                    livreurs.forEach(l => {
+                        const option = document.createElement("option");
+                        option.value = l._id;
+                        option.text = l.username || 'Livreur';
+                        select.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement("option");
+                    option.value = "";
+                    option.text = "Aucun livreur disponible";
+                    select.appendChild(option);
+                }
+            });
+        } catch (error) {
+            console.error('Erreur:', error);
+            document.querySelectorAll('select[id^="livreur-"]').forEach(select => {
+                select.innerHTML = '<option value="">Erreur de chargement</option>';
+            });
+        }
+    }
+    
+    // Show assign form
+    function showAssignForm(commandeId) {
+        const form = document.getElementById('assignForm-' + commandeId);
+        
+        // Load livreurs if not already loaded
+        const select = document.getElementById('livreur-' + commandeId);
+        if (select.options.length <= 1) {
+            loadLivreurs();
+        }
+        
+        // Toggle form visibility
+        if (form.style.display === 'block') {
+            form.style.display = 'none';
+        } else {
+            form.style.display = 'block';
+            form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+    
+    // Assign livreur to order
+    async function assignLivreur(commandeId) {
+        const select = document.getElementById('livreur-' + commandeId);
+        const livreurId = select.value;
+        
+        if (!livreurId) {
+            alert('Veuillez sélectionner un livreur');
+            return;
+        }
+        
+        try {
+            const res = await fetch("/restaurant/commandes/accepter", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ commandeId, livreurId })
+            });
+            
+            if (res.ok) {
+                alert("Commande acceptée !");
+                location.reload();
+            } else {
+                const errorText = await res.text();
+                alert("Erreur : " + errorText);
+            }
+        } catch (error) {
+            alert("Erreur réseau : " + error.message);
+        }
+    }
+    
+    // Load livreurs on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadLivreurs();
+    });
+</script>
+
+</body>
+</html>

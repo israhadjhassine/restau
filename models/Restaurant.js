@@ -8,4 +8,6 @@ const RestaurantSchema = new mongoose.Schema({
   menu: [{ type: mongoose.Schema.Types.ObjectId, ref: "Menu" }] // <-- ajouté
 });
 
+
+
 module.exports = User.discriminator("Restaurant", RestaurantSchema);

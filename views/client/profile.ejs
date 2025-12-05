@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil - FoodDelivery</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Navbar */
+        .navbar { 
+            background: #e44d26; 
+            padding: 1rem 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: white; 
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo h2 a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .nav-links a { 
+            color: white; 
+            text-decoration: none; 
+            margin-left: 1.5rem; 
+            padding: 0.5rem 1rem; 
+            border-radius: 4px; 
+            transition: background 0.3s; 
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover { 
+            background: rgba(255,255,255,0.2); 
+        }
+        
+        /* Profile Container */
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            padding-top: 100px;
+        }
+        
+        .profile-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .profile-header h1 {
+            color: #e44d26;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        /* Profile Grid */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 3rem;
+        }
+        
+        /* Sidebar */
+        .profile-sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+        
+        .avatar-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #e44d26, #ff7b54);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 3.5rem;
+            color: white;
+            font-weight: bold;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .user-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .user-role {
+            display: inline-block;
+            background: #e44d26;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #e44d26;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        /* Main Content */
+        .profile-content {
+            background: white;
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .section {
+            margin-bottom: 3rem;
+        }
+        
+        .section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section h2 {
+            color: #e44d26;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section h2 i {
+            font-size: 1.5rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .info-item {
+            margin-bottom: 1rem;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.3rem;
+            font-size: 0.95rem;
+        }
+        
+        .info-value {
+            font-size: 1.1rem;
+            color: #333;
+            padding: 0.8rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #e44d26;
+        }
+        
+        /* Orders Section */
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .order-card {
+            padding: 1.2rem;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid #e44d26;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+        
+        .order-id {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .order-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-delivered { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .status-processing { background: #cce5ff; color: #004085; }
+        
+        .order-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #666;
+        }
+        
+        /* Actions */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .action-btn {
+            padding: 1rem;
+            background: #e44d26;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .action-btn:hover {
+            background: #c63d1a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(228, 77, 38, 0.3);
+        }
+        
+        .action-btn.secondary {
+            background: #6c757d;
+        }
+        
+        .action-btn.secondary:hover {
+            background: #5a6268;
+        }
+        
+        .action-btn.danger {
+            background: #dc3545;
+        }
+        
+        .action-btn.danger:hover {
+            background: #c82333;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .profile-sidebar {
+                position: static;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 1rem;
+                padding-top: 80px;
+            }
+            
+            .profile-content {
+                padding: 1.5rem;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .order-details {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .section h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <h2><a href="/">FoodDelivery</a></h2>
+        </div>
+        <div class="nav-links">
+            <a href="/">Accueil</a>
+            <a href="/client/restaurants">Restaurants</a>
+            <a href="/client/cart">Panier</a>
+            <a href="/client/home-private">Tableau de bord</a>
+            <a href="/logout">Déconnexion</a>
+        </div>
+    </nav>
+
+    <!-- Profile Container -->
+    <div class="profile-container">
+        <!-- Header -->
+        <div class="profile-header">
+            <h1>Mon Profil</h1>
+            <p>Gérez vos informations personnelles et vos commandes</p>
+        </div>
+
+        <!-- Profile Grid -->
+        <div class="profile-grid">
+            <!-- Sidebar -->
+            <div class="profile-sidebar">
+                <div class="avatar-container">
+                    <div class="avatar" id="userAvatar">
+                        <%= user.username ? user.username.charAt(0).toUpperCase() : 'U' %>
+                    </div>
+                    <div class="user-name"><%= user.username || 'Utilisateur' %></div>
+                    <div class="user-role"><%= user.role || 'Client' %></div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="orderCount">0</div>
+                        <div class="stat-label">Commandes</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalSpent">0 DT</div>
+                        <div class="stat-label">Dépensé</div>
+                    </div>
+                </div>
+
+                <!-- Member Since -->
+              
+            </div>
+
+            <!-- Main Content -->
+            <div class="profile-content">
+                <!-- Personal Information -->
+                <div class="section">
+                    <h2>📋 Informations Personnelles</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Nom complet</div>
+                            <div class="info-value"><%= user.username || 'Non spécifié' %></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value"><%= user.email || 'Non spécifié' %></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Téléphone</div>
+                            <div class="info-value"><%= user.phone || 'Non spécifié' %></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Adresse</div>
+                            <div class="info-value"><%= user.address || 'Non spécifié' %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Orders -->
+                <div class="section">
+                    <h2>📦 Dernières Commandes</h2>
+                    <div class="orders-list" id="ordersList">
+                        <!-- Orders will be loaded here -->
+                        <div class="empty-state">
+                            <div class="empty-icon">📦</div>
+                            <p>Aucune commande récente</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="section">
+                    <h2>⚙️ Actions</h2>
+                    <div class="actions-grid">
+                        <button class="action-btn" onclick="editProfile()">
+                            ✏️ Modifier le profil
+                        </button>
+                        <button class="action-btn secondary" onclick="viewOrderHistory()">
+                            📋 Historique des commandes
+                        </button>
+                        <button class="action-btn secondary" onclick="changePassword()">
+                            🔒 Changer le mot de passe
+                        </button>
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data - replace with actual data from your backend
+        const mockOrders = [
+            {
+                id: "CMD-2024-001",
+                date: "2024-01-15",
+                restaurant: "Pizza House",
+                amount: "45.00",
+                status: "delivered",
+                statusText: "Livré"
+            },
+            {
+                id: "CMD-2024-002",
+                date: "2024-01-10",
+                restaurant: "Burger King",
+                amount: "32.50",
+                status: "processing",
+                statusText: "En cours"
+            },
+            {
+                id: "CMD-2024-003",
+                date: "2024-01-05",
+                restaurant: "Sushi Zen",
+                amount: "78.00",
+                status: "pending",
+                statusText: "En attente"
+            }
+        ];
+
+        // Load orders on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrders();
+            updateStats();
+        });
+
+        function loadOrders() {
+            const ordersList = document.getElementById('ordersList');
+            
+            if (mockOrders.length === 0) {
+                ordersList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📦</div>
+                        <p>Aucune commande récente</p>
+                    </div>
+                `;
+                return;
+            }
+
+            ordersList.innerHTML = mockOrders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-id">${order.id}</div>
+                        <div class="order-status status-${order.status}">${order.statusText}</div>
+                    </div>
+                    <div class="order-details">
+                        <div>
+                            <strong>${order.restaurant}</strong><br>
+                            <small>${new Date(order.date).toLocaleDateString('fr-FR')}</small>
+                        </div>
+                        <div>
+                            <strong>${order.amount} DT</strong><br>
+                            <small>Total</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            // Mock stats - replace with actual data
+            document.getElementById('orderCount').textContent = mockOrders.length;
+            document.getElementById('totalSpent').textContent = 
+                mockOrders.reduce((sum, order) => sum + parseFloat(order.amount), 0).toFixed(2) + ' DT';
+        }
+
+        function editProfile() {
+            Swal.fire({
+                title: 'Modifier le profil',
+                html: `
+                    <input id="swal-name" class="swal2-input" placeholder="Nom complet" value="<%= user.username || '' %>">
+                    <input id="swal-email" class="swal2-input" placeholder="Email" value="<%= user.email || '' %>">
+                    <input id="swal-phone" class="swal2-input" placeholder="Téléphone" value="<%= user.phone || '' %>">
+                    <input id="swal-address" class="swal2-input" placeholder="Adresse" value="<%= user.address || '' %>">
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Enregistrer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#e44d26',
+                preConfirm: () => {
+                    // Add your update logic here
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve();
+                        }, 1000);
+                    });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Succès!', 'Votre profil a été mis à jour.', 'success');
+                    // Reload or update the page
+                    setTimeout(() => location.reload(), 1500);
+                }
+            });
+        }
+
+        function viewOrderHistory() {
+            window.location.href = '/client/orders'; // Create this route if needed
+        }
+
+        function changePassword() {
+            Swal.fire({
+                title: 'Changer le mot de passe',
+                html: `
+                    <input id="swal-current" type="password" class="swal2-input" placeholder="Mot de passe actuel">
+                    <input id="swal-new" type="password" class="swal2-input" placeholder="Nouveau mot de passe">
+                    <input id="swal-confirm" type="password" class="swal2-input" placeholder="Confirmer le mot de passe">
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Changer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#e44d26',
+                preConfirm: () => {
+                    // Add your password change logic here
+                }
+            });
+        }
+
+        function logout() {
+            Swal.fire({
+                title: 'Êtes-vous sûr ?',
+                text: "Vous serez déconnecté de votre compte",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e44d26',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Oui, déconnecter',
+                cancelButtonText: 'Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/logout';
+                }
+            });
+        }
+
+        // Update avatar with first letter of username
+        document.addEventListener('DOMContentLoaded', function() {
+            const username = '<%= user.username || "" %>';
+            if (username) {
+                document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+            }
+        });
+    </script>
+</body>
+</html>

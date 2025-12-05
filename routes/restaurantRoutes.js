@@ -24,4 +24,20 @@ router.post("/plats/edit/:id", restaurantController.modifierPlat);
 // Supprimer plat
 router.post("/plats/delete/:id", restaurantController.supprimerPlat);
 
+
+
+
+
+// Afficher toutes les commandes en attente
+router.get("/commandes", restaurantController.getCommandesEnAttente);
+
+// Récupérer les livreurs disponibles
+router.get("/livreurs/disponibles", restaurantController.getLivreursDisponibles);
+
+// Accepter une commande et assigner un livreur
+router.post("/commandes/accepter", restaurantController.accepterCommande);
+
+
+
+
 module.exports = router;

@@ -27,12 +27,12 @@
 <body>
     <nav class="navbar">
         <div class="logo">
-            <h2>FoodDelivery</h2>
+            <h2><a href="/" style="color: white; text-decoration: none;">FoodDelivery</a></h2>
         </div>
         <div class="nav-links">
             <a href="/client/restaurants">Restaurants</a>
             <a href="/client/cart">Panier</a>
-            <a href="/client/profile">Mon Compte</a>
+            <a href="/client/home-private">Mon Compte</a>
             <a href="/logout">Déconnexion</a>
         </div>
     </nav>
@@ -53,7 +53,7 @@
                 <h3>🛒 Voir mon panier</h3>
                 <p>Consulter mes articles</p>
             </a>
-            <a href="/client/dashboard" class="action-btn">
+            <a href="/client/profile" class="action-btn">
                 <h3>👤 Mon profil</h3>
                 <p>Gérer mon compte</p>
             </a>
@@ -72,7 +72,7 @@
                             <div class="restaurant-info">
                                 <h3><%= restaurant.nomRestaurant %></h3>
                                 <p><%= restaurant.adresse %></p>
-                                <p><strong>Téléphone:</strong> <%= restaurant.telephone %></p>
+                             
                             </div>
                         </div>
                     <% }); %>
@@ -82,7 +82,7 @@
             </div>
         </div>
 
-        <!-- Recent Orders (you can implement this later) -->
+        <!-- Recent Orders -->
         <div class="dashboard-card" style="margin-top: 3rem;">
             <h2>Mes commandes récentes</h2>
             <p style="color: #666; margin-top: 1rem;">Vous n'avez pas de commandes récentes.</p>

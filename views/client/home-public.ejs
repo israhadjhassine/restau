@@ -29,10 +29,11 @@
 <body>
     <nav class="navbar">
         <div class="logo">
-            <h2>FoodDelivery</h2>
+            <h2><a href="/" style="color: white; text-decoration: none;">FoodDelivery</a></h2>
         </div>
         <div class="nav-links">
             <a href="/client/restaurants">Restaurants</a>
+            <!-- NO USER CHECK HERE - Always show login/signup on public home -->
             <a href="/login">Connexion</a>
             <a href="/signup">Inscription</a>
         </div>
@@ -80,7 +81,7 @@
                         <div class="restaurant-info">
                             <h3><%= restaurant.nomRestaurant %></h3>
                             <p><%= restaurant.adresse %></p>
-                            <p><strong>Téléphone:</strong> <%= restaurant.telephone %></p>
+                         
                         </div>
                     </div>
                 <% }); %>

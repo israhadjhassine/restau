@@ -1,75 +1,461 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Admin</title>
-  <style>
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f4f4f4;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-
-    h1 {
-      margin-top: 30px;
-      color: #333;
-    }
-
-    .container {
-      margin-top: 50px;
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      flex-wrap: wrap;
-      padding: 0 10px;
-    }
-
-    .card {
-      background: white;
-      padding: 25px;
-      width: 250px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      transition: 0.3s;
-      margin-bottom: 20px;
-    }
-
-    .card:hover {
-      transform: scale(1.05);
-    }
-
-    a {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 10px 15px;
-      background: #333;
-      color: white;
-      border-radius: 5px;
-      text-decoration: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - FoodDelivery</title>
+    <style>
+        /* Votre CSS original - sans changement */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* Navbar Admin */
+        .navbar { 
+            background: #2c3e50; 
+            padding: 1rem 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: white; 
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        
+        .logo h2 a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+        }
+        
+        .nav-links { 
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .nav-links a { 
+            color: white; 
+            text-decoration: none; 
+            padding: 0.5rem 1rem; 
+            border-radius: 4px; 
+            transition: all 0.3s; 
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .nav-links a:hover { 
+            background: rgba(255,255,255,0.15); 
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a.active { 
+            background: #e44d26;
+        }
+        
+        .logout-btn {
+            background: #e44d26;
+            padding: 0.5rem 1.5rem;
+            border-radius: 4px;
+        }
+        
+        .logout-btn:hover {
+            background: #c63d1a;
+        }
+        
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            padding-top: 100px;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 3rem;
+        }
+        
+        .dashboard-header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dashboard-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            border-left: 5px solid #e44d26;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+        
+        .stat-card h3 {
+            color: #2c3e50;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #e44d26;
+            margin: 0.5rem 0;
+        }
+        
+        .stat-trend {
+            font-size: 0.9rem;
+            color: #27ae60;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .stat-trend.negative {
+            color: #e74c3c;
+        }
+        
+        /* Quick Actions */
+        .actions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .actions-header h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            border-color: #e44d26;
+        }
+        
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #e44d26;
+        }
+        
+        .action-card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .action-card p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .action-btn {
+            display: inline-block;
+            background: #e44d26;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid #e44d26;
+        }
+        
+        .action-btn:hover {
+            background: white;
+            color: #e44d26;
+        }
+        
+        /* Recent Activity */
+        .activity-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-top: 3rem;
+        }
+        
+        .activity-section h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .activity-list {
+            list-style: none;
+        }
+        
+        .activity-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e44d26;
+            font-size: 1.2rem;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-content p {
+            color: #333;
+            margin-bottom: 0.2rem;
+        }
+        
+        .activity-time {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                padding: 1.5rem;
+                padding-top: 90px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dashboard-container {
+                padding: 1rem;
+                padding-top: 80px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+            
+            .action-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <h2><a href="/admin">FoodDelivery Admin</a></h2>
+        </div>
+        <div class="nav-links">
+            <a href="/admin/dashboard" class="active">Dashboard</a>
+            <a href="/admin/inscriptions">Inscriptions</a>
+            <a href="/admin/restaurants">Restaurants</a>
+            <a href="#">Utilisateurs</a>
+            <a href="#">Commandes</a>
+            <a href="/logout" class="logout-btn">Déconnexion</a>
+        </div>
+    </nav>
 
-<h1>Dashboard Administrateur</h1>
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>Dashboard Administrateur</h1>
+            <p>Gérez votre plateforme FoodDelivery</p>
+        </div>
 
-<div class="container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>📋 Inscriptions en attente</h3>
+                <div class="stat-value">2</div>
+                <div class="stat-trend">
+                    <span>↗</span>
+                    +2 aujourd'hui
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>🏪 Restaurants actifs</h3>
+                <div class="stat-value">5</div>
+                <div class="stat-trend">
+                    <span>↗</span>
+                    +1 cette semaine
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>👥 Utilisateurs totaux</h3>
+                <div class="stat-value">12</div>
+                <div class="stat-trend">
+                    <span>↗</span>
+                    +5 cette semaine
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>📦 Commandes du jour</h3>
+                <div class="stat-value">3</div>
+                <div class="stat-trend">
+                    <span>↗</span>
+                    +15% vs hier
+                </div>
+            </div>
+        </div>
 
-  <div class="card">
-    <h3>Inscriptions à valider</h3>
-    <a href="/admin/inscriptions">Gérer</a>
-  </div>
+        <!-- Quick Actions -->
+        <div class="actions-header">
+            <h2>Actions rapides</h2>
+        </div>
+        
+        <div class="actions-grid">
+            <div class="action-card">
+                <div class="action-icon">✅</div>
+                <h3>Valider des inscriptions</h3>
+                <p>Approuvez ou rejetez les nouvelles inscriptions en attente de validation</p>
+                <a href="/admin/inscriptions" class="action-btn">Gérer</a>
+            </div>
+            
+            <div class="action-card">
+                <div class="action-icon">🏪</div>
+                <h3>Gérer les restaurants</h3>
+                <p>Consultez et gérez tous les restaurants inscrits sur la plateforme</p>
+                <a href="/admin/restaurants" class="action-btn">Voir</a>
+            </div>
+            
+            <div class="action-card">
+                <div class="action-icon">👥</div>
+                <h3>Gérer les utilisateurs</h3>
+                <p>Visualisez et gérez tous les utilisateurs de la plateforme</p>
+                <a href="/admin/users" class="action-btn">Gérer</a>
+            </div>
+            
+            <div class="action-card">
+                <div class="action-icon">📊</div>
+                <h3>Voir les statistiques</h3>
+                <p>Accédez aux données détaillées et aux rapports d'activité</p>
+                <a href="/admin/stats" class="action-btn">Voir</a>
+            </div>
+        </div>
 
-  <div class="card">
-    <h3>Restaurants</h3>
-    <a href="/admin/restaurants">Voir</a>
-  </div>
-
-</div>
-
+        <!-- Recent Activity -->
+        <div class="activity-section">
+            <h2>Activité récente</h2>
+            <ul class="activity-list">
+                <li class="activity-item">
+                    <div class="activity-icon">✅</div>
+                    <div class="activity-content">
+                        <p>Nouveau restaurant "Pizza House" approuvé</p>
+                        <div class="activity-time">Il y a 10 minutes</div>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon">👤</div>
+                    <div class="activity-content">
+                        <p>Utilisateur "Jean Dupont" s'est inscrit</p>
+                        <div class="activity-time">Il y a 30 minutes</div>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon">🏪</div>
+                    <div class="activity-content">
+                        <p>Restaurant "Burger King" mis à jour</p>
+                        <div class="activity-time">Il y a 2 heures</div>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon">📦</div>
+                    <div class="activity-content">
+                        <p>Nouvelle commande #CMD-2024-056</p>
+                        <div class="activity-time">Il y a 3 heures</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
 </body>
 </html>

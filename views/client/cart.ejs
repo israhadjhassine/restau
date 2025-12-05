@@ -8,7 +8,8 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
         .navbar { background: #e44d26; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; }
-        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; padding: 0.5rem 1rem; border-radius: 4px; transition: background 0.3s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
         .container { max-width: 800px; margin: 2rem auto; padding: 0 2rem; }
         .cart-item { border: 1px solid #ddd; padding: 1rem; margin: 1rem 0; display: flex; justify-content: space-between; align-items: center; }
         .quantity-controls { display: flex; align-items: center; gap: 10px; }
@@ -25,12 +26,14 @@
             <h2><a href="/" style="color: white; text-decoration: none;">FoodDelivery</a></h2>
         </div>
         <div class="nav-links">
-            <a href="/">Accueil</a>
             <a href="/client/restaurants">Restaurants</a>
             <% if (user) { %>
-                <a href="/client/dashboard">Mon Compte</a>
+                <!-- Logged in user -->
+                <a href="/client/cart">Panier</a>
+                <a href="/client/home-private">Mon Compte</a>
                 <a href="/logout">Déconnexion</a>
             <% } else { %>
+                <!-- Guest user -->
                 <a href="/login">Connexion</a>
                 <a href="/signup">Inscription</a>
             <% } %>
@@ -40,48 +43,57 @@
     <div class="container">
         <h1>Votre Panier</h1>
         
+        <!-- Login prompt for guests -->
+        <% if (!user) { %>
+            <div class="login-prompt">
+                <p>Vous devez être connecté pour passer commande.</p>
+                <a href="/login" style="color: #e44d26; font-weight: bold;">Se connecter</a> ou 
+                <a href="/signup" style="color: #e44d26; font-weight: bold;">S'inscrire</a>
+            </div>
+        <% } %>
+        
         <% if (cart && cart.length > 0) { %>
             <!-- Restaurant info -->
-            <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
-                <h3>Commande chez: <%= cart[0].nomRestaurant || 'Restaurant' %></h3>
-            </div>
+            <% if (cart[0].nomRestaurant) { %>
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem;">
+                    <h3>Commande chez: <%= cart[0].nomRestaurant %></h3>
+                </div>
+            <% } %>
 
             <!-- Cart items -->
             <% cart.forEach(function(item) { %>
                 <div class="cart-item">
                     <div>
-                        <h3><%= item.nom %></h3>
-                        <p>Prix unitaire: <%= item.prix %> €</p>
+                        <h3><%= item.nom || item.name %></h3>
+                        <p>Prix unitaire: <%= item.prix || item.price %> DT</p>
                     </div>
                     <div class="quantity-controls">
-                       <button class="quantity-btn" onclick="updateQuantity('<%= item.itemId %>', getNewQuantity('<%= item.quantite %>', -1))">-</button>
-<span style="margin: 0 10px;"><%= item.quantite %></span>
-<button class="quantity-btn" onclick="updateQuantity('<%= item.itemId %>', getNewQuantity('<%= item.quantite %>', 1))">+</button>
-   <button class="remove-btn" onclick="removeItem('<%= item.itemId %>')">×</button>
+                        <button class="quantity-btn" onclick="updateQuantity('<%= item.itemId || item.id %>', getNewQuantity('<%= item.quantite || item.quantity %>', -1))">-</button>
+                        <span style="margin: 0 10px;"><%= item.quantite || item.quantity || 1 %></span>
+                        <button class="quantity-btn" onclick="updateQuantity('<%= item.itemId || item.id %>', getNewQuantity('<%= item.quantite || item.quantity %>', 1))">+</button>
+                        <button class="remove-btn" onclick="removeItem('<%= item.itemId || item.id %>')">×</button>
                     </div>
                     <div>
-                        <p><strong>Total: <%= (parseFloat(item.prix || 0) * parseInt(item.quantite || 1)).toFixed(2) %> €</strong></p>
+                        <% 
+                            const prix = parseFloat(item.prix || item.price || 0);
+                            const quantite = parseInt(item.quantite || item.quantity || 1);
+                            const itemTotal = prix * quantite;
+                        %>
+                        <p><strong>Total: <%= itemTotal.toFixed(2) %> DT</strong></p>
                     </div>
                 </div>
             <% }); %>
 
             <!-- Total and checkout -->
             <div style="text-align: right; margin-top: 2rem; padding-top: 1rem; border-top: 2px solid #ddd;">
-                <h3>Total: <%= total %> €</h3>
-                
+                <h3>Total: <%= total %> DT</h3>
+
                 <% if (user) { %>
-                    <!-- User is logged in - can checkout -->
-                    <button class="checkout-btn" onclick="checkout()">Passer la commande</button>
+                    <form action="/client/passerCommande" method="POST">
+                        <button type="submit" class="checkout-btn">Passer la commande</button>
+                    </form>
                 <% } else { %>
-                    <!-- User is not logged in - show login prompt -->
-                    <div class="login-prompt">
-                        <h4>Connectez-vous pour commander</h4>
-                        <p>Vous devez être connecté pour finaliser votre commande.</p>
-                        <a href="/login?redirect=/client/cart" style="color: #e44d26; font-weight: bold;">Se connecter</a>
-                        <span> ou </span>
-                        <a href="/signup?redirect=/client/cart" style="color: #e44d26; font-weight: bold;">Créer un compte</a>
-                    </div>
-                    <button class="checkout-btn" disabled>Passer la commande</button>
+                    <button class="checkout-btn" disabled>Connectez-vous pour commander</button>
                 <% } %>
             </div>
 
@@ -99,36 +111,40 @@
     </div>
 
     <script>
-
-function getNewQuantity(currentQuantite, change) {
-    const quantite = parseInt(currentQuantite) || 1;
-    return quantite + change;
-}
+        function getNewQuantity(currentQuantite, change) {
+            const quantite = parseInt(currentQuantite) || 1;
+            const newQuantite = quantite + change;
+            return newQuantite < 1 ? 1 : newQuantite;
+        }
 
         function updateQuantity(itemId, newQuantite) {
-            if (newQuantite < 0) return;
+            console.log("Updating quantity for item", itemId, "to", newQuantite);
             
             fetch('/client/cart/update', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+                headers: { 
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    itemId: itemId,
-                    quantite: newQuantite
+                body: JSON.stringify({ 
+                    itemId: itemId, 
+                    quantite: parseInt(newQuantite) 
                 })
             })
-            .then(function(response) {
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
                 return response.json();
             })
-            .then(function(data) {
+            .then(data => {
+                console.log("Update response:", data);
                 if (data.success) {
                     location.reload();
                 } else {
                     alert('Erreur: ' + (data.message || 'Erreur inconnue'));
                 }
             })
-            .catch(function(error) {
+            .catch(error => {
                 console.error('Error:', error);
                 alert('Erreur lors de la mise à jour de la quantité');
             });
@@ -138,24 +154,22 @@ function getNewQuantity(currentQuantite, change) {
             if (confirm('Êtes-vous sûr de vouloir supprimer cet article?')) {
                 fetch('/client/cart/remove', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
+                    headers: { 
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        itemId: itemId
+                    body: JSON.stringify({ 
+                        itemId: itemId 
                     })
                 })
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(data) {
+                .then(response => response.json())
+                .then(data => {
                     if (data.success) {
                         location.reload();
                     } else {
                         alert('Erreur: ' + (data.message || 'Erreur inconnue'));
                     }
                 })
-                .catch(function(error) {
+                .catch(error => {
                     console.error('Error:', error);
                     alert('Erreur lors de la suppression de l\'article');
                 });
@@ -164,28 +178,25 @@ function getNewQuantity(currentQuantite, change) {
 
         function clearCart() {
             if (confirm('Êtes-vous sûr de vouloir vider votre panier?')) {
-                fetch('/client/cart/clear', {
-                    method: 'POST'
+                fetch('/client/cart/clear', { 
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    }
                 })
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(data) {
+                .then(response => response.json())
+                .then(data => {
                     if (data.success) {
                         location.reload();
                     } else {
                         alert('Erreur: ' + (data.message || 'Erreur inconnue'));
                     }
                 })
-                .catch(function(error) {
+                .catch(error => {
                     console.error('Error:', error);
                     alert('Erreur lors du vidage du panier');
                 });
             }
-        }
-
-        function checkout() {
-            window.location.href = '/client/checkout';
         }
     </script>
 </body>

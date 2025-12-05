@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement - FoodDelivery</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
+        .navbar { background: #e44d26; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 2rem; padding: 0.5rem 1rem; border-radius: 4px; transition: background 0.3s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
+        .container { max-width: 600px; margin: 2rem auto; padding: 0 2rem; }
+        .payment-card { border: 1px solid #ddd; border-radius: 10px; padding: 2rem; margin-top: 2rem; }
+        .btn { background: #e44d26; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1rem; width: 100%; margin-top: 1rem; }
+        .btn:hover { background: #c63d1a; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        #payment-message { color: #dc3545; margin-top: 1rem; padding: 1rem; background: #f8d7da; border-radius: 5px; }
+        #payment-element { margin: 1rem 0; }
+        .hidden { display: none; }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s ease infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .payment-success { color: #28a745; background: #d4edda; padding: 1rem; border-radius: 5px; margin: 1rem 0; }
+        .payment-methods { margin: 2rem 0; }
+        .payment-method { border: 1px solid #ddd; padding: 1rem; margin: 1rem 0; border-radius: 5px; cursor: pointer; }
+        .payment-method:hover { background: #f8f9fa; }
+        .payment-method.selected { border-color: #e44d26; background: #fff3e6; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h2><a href="/" style="color: white; text-decoration: none;">FoodDelivery</a></h2>
+        </div>
+        <div class="nav-links">
+            <a href="/client/restaurants">Restaurants</a>
+            <a href="/client/cart">Panier</a>
+            <a href="/client/home-private">Mon Compte</a>
+            <a href="/logout">Déconnexion</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Paiement Sécurisé</h1>
+        
+        <!-- Hidden div with all payment data (SAFE METHOD) -->
+        <div id="paymentData" 
+             data-amount="<%= amount %>" 
+             data-commande-id="<%= commandeId %>" 
+             data-base-url="<%= process.env.BASE_URL || 'http://localhost:3000' %>"
+             style="display: none;">
+        </div>
+        
+        <div class="payment-card">
+            <h2>Récapitulatif de votre commande</h2>
+            <p><strong>Montant à payer:</strong> <span id="amountDisplay"><%= (amount / 100).toFixed(2) %></span> DT</p>
+            <p><strong>Numéro de commande:</strong> #<span id="commandeIdDisplay"><%= commandeId %></span></p>
+            <p><strong>Date:</strong> <span id="dateDisplay"><%= new Date().toLocaleDateString('fr-FR') %></span></p>
+            
+            <!-- Payment methods selection -->
+            <div class="payment-methods">
+                <h3>Choisissez votre méthode de paiement</h3>
+                
+                <div class="payment-method" onclick="selectPaymentMethod('stripe')" id="stripeMethod">
+                    <h4>💳 Carte Bancaire (Stripe)</h4>
+                    <p>Paiement sécurisé en ligne avec Stripe</p>
+                </div>
+                
+                <div class="payment-method" onclick="selectPaymentMethod('cash')" id="cashMethod">
+                    <h4>💰 Paiement à la livraison</h4>
+                    <p>Payez en espèces lorsque vous recevez votre commande</p>
+                </div>
+                
+                <div class="payment-method" onclick="selectPaymentMethod('wallet')" id="walletMethod">
+                    <h4>📱 Portefeuille numérique</h4>
+                    <p>Utilisez votre portefeuille électronique</p>
+                </div>
+            </div>
+            
+            <!-- Stripe Payment Form (hidden by default) -->
+            <div id="stripePaymentForm" class="hidden">
+                <h3>Paiement par Carte Bancaire</h3>
+                <form id="payment-form">
+                    <div id="payment-element"></div>
+                    <button id="submit" class="btn">
+                        <div class="spinner hidden" id="spinner"></div>
+                        <span id="button-text">Payer avec Stripe</span>
+                    </button>
+                    <div id="payment-message" class="hidden"></div>
+                </form>
+            </div>
+            
+            <!-- Simple Payment Button (for non-Stripe methods) -->
+            <div id="simplePaymentForm">
+                <button id="simplePayButton" class="btn" onclick="processSimplePayment()">
+                    Confirmer le paiement
+                </button>
+            </div>
+            
+            <!-- Alternative actions -->
+            <div style="margin-top: 2rem; text-align: center;">
+                <a href="/client/cart" style="color: #e44d26; margin-right: 1rem;">← Retour au panier</a>
+                <a href="/client/restaurants" style="color: #e44d26;">Voir d'autres restaurants</a>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // ========== INITIALIZATION ==========
+    // Get payment data from HTML attributes
+    const paymentData = document.getElementById('paymentData');
+    const amount = parseInt(paymentData.dataset.amount) || 0;
+    const commandeId = paymentData.dataset.commandeId || '';
+    
+    // Payment state
+    let selectedPaymentMethod = 'cash'; // Default to cash
+    let stripe = null;
+    let elements = null;
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Payment page initialized:', {
+            amount: amount,
+            commandeId: commandeId,
+            displayAmount: (amount / 100).toFixed(2) + ' DT'
+        });
+        
+        // Select cash payment by default
+        selectPaymentMethod('cash');
+    });
+    
+    // ========== PAYMENT METHOD SELECTION ==========
+    function selectPaymentMethod(method) {
+        // Don't allow selecting Stripe if it's disabled
+        if (method === 'stripe') {
+            const stripeMethod = document.getElementById('stripeMethod');
+            if (stripeMethod && stripeMethod.style.opacity === '0.6') {
+                console.log("Stripe method is disabled, cannot select");
+                showMessage("Le paiement par carte bancaire est temporairement indisponible.", true);
+                return; // Don't change selection
+            }
+        }
+        
+        selectedPaymentMethod = method;
+        
+        // Update UI for all methods
+        document.querySelectorAll('.payment-method').forEach(el => {
+            el.classList.remove('selected');
+        });
+        
+        // Highlight selected method
+        const methodElement = document.getElementById(method + 'Method');
+        if (methodElement) {
+            methodElement.classList.add('selected');
+        }
+        
+        // Show/hide appropriate payment form
+        if (method === 'stripe') {
+            document.getElementById('stripePaymentForm').classList.remove('hidden');
+            document.getElementById('simplePaymentForm').classList.add('hidden');
+            initializeStripePayment();
+        } else {
+            document.getElementById('stripePaymentForm').classList.add('hidden');
+            document.getElementById('simplePaymentForm').classList.remove('hidden');
+            const button = document.getElementById('simplePayButton');
+            if (button) {
+                button.textContent = `Confirmer le paiement (${getPaymentMethodName(method)})`;
+            }
+        }
+        
+        console.log('Selected payment method:', method);
+    }
+    
+    function getPaymentMethodName(method) {
+        const names = {
+            'stripe': 'Carte Bancaire',
+            'cash': 'À la livraison',
+            'wallet': 'Portefeuille'
+        };
+        return names[method] || method;
+    }
+    
+    // ========== STRIPE PAYMENT ==========
+    async function initializeStripePayment() {
+        try {
+            console.log("🔄 Initializing Stripe payment...");
+            
+            // Show loading state
+            setLoading(true, 'stripe');
+            
+            // Check Stripe availability FIRST
+            const checkResponse = await fetch('/client/payment/check-stripe');
+            if (!checkResponse.ok) {
+                throw new Error('Cannot check Stripe configuration');
+            }
+            
+            const checkData = await checkResponse.json();
+            console.log("Stripe check result:", checkData);
+            
+            if (!checkData.available) {
+                // Stripe is not configured - disable this option
+                disableStripeOption('Stripe n\'est pas configuré sur le serveur');
+                return false;
+            }
+            
+            // Try to create payment intent
+            const intentResponse = await fetch('/client/payment/create-payment-intent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: amount })
+            });
+            
+            if (!intentResponse.ok) {
+                // Try to get error message
+                let errorMsg = 'Erreur serveur lors de la création du paiement';
+                try {
+                    const errorData = await intentResponse.json();
+                    errorMsg = errorData.error || errorData.message || errorMsg;
+                } catch (e) {
+                    errorMsg = `Erreur ${intentResponse.status}: ${intentResponse.statusText}`;
+                }
+                throw new Error(errorMsg);
+            }
+            
+            const intentData = await intentResponse.json();
+            console.log("Payment intent created:", intentData);
+            
+            if (!intentData.clientSecret) {
+                throw new Error('Client secret manquant');
+            }
+            
+            // Initialize Stripe - USE THE GLOBAL VARIABLES
+            stripe = Stripe(checkData.publicKey);
+            elements = stripe.elements({
+                clientSecret: intentData.clientSecret,
+                appearance: { theme: 'stripe' }
+            });
+            
+            const paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+            
+            // Setup form submission
+            const paymentForm = document.getElementById('payment-form');
+            if (paymentForm) {
+                // Remove any existing listeners
+                paymentForm.removeEventListener('submit', handleStripeSubmit);
+                // Add new listener
+                paymentForm.addEventListener('submit', handleStripeSubmit);
+            }
+            
+            console.log('✅ Stripe initialized successfully');
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Stripe initialization failed:', error);
+            
+            // Show error and switch to cash
+            showMessage(`Carte bancaire indisponible: ${error.message}`, true);
+            
+            // Force switch to cash payment
+            setTimeout(() => {
+                selectPaymentMethod('cash');
+            }, 100);
+            
+            return false;
+            
+        } finally {
+            setLoading(false, 'stripe');
+        }
+    }
+    
+    // Helper function to disable Stripe option
+    function disableStripeOption(reason) {
+        const stripeMethod = document.getElementById('stripeMethod');
+        if (stripeMethod) {
+            stripeMethod.innerHTML = `
+                <h4>💳 Carte Bancaire (Indisponible)</h4>
+                <p style="color: #dc3545; font-size: 0.9rem;">${reason}</p>
+            `;
+            stripeMethod.style.opacity = '0.6';
+            stripeMethod.style.cursor = 'not-allowed';
+            stripeMethod.onclick = null;
+            
+            // Show message
+            showMessage(`Le paiement par carte est temporairement indisponible: ${reason}`, true);
+        }
+    }
+    
+    // Update selectPaymentMethod to prevent selecting disabled Stripe
+    function selectPaymentMethod(method) {
+        // Prevent selecting disabled Stripe
+        if (method === 'stripe') {
+            const stripeMethod = document.getElementById('stripeMethod');
+            if (stripeMethod && stripeMethod.style.opacity === '0.6') {
+                console.log("Cannot select disabled Stripe method");
+                showMessage("Cette méthode de paiement est temporairement indisponible", true);
+                return;
+            }
+        }
+        
+        selectedPaymentMethod = method;
+        
+        // Update UI
+        document.querySelectorAll('.payment-method').forEach(el => {
+            el.classList.remove('selected');
+        });
+        
+        const methodElement = document.getElementById(method + 'Method');
+        if (methodElement) {
+            methodElement.classList.add('selected');
+        }
+        
+        // Show appropriate form
+        if (method === 'stripe') {
+            document.getElementById('stripePaymentForm').classList.remove('hidden');
+            document.getElementById('simplePaymentForm').classList.add('hidden');
+            initializeStripePayment();
+        } else {
+            document.getElementById('stripePaymentForm').classList.add('hidden');
+            document.getElementById('simplePaymentForm').classList.remove('hidden');
+            updateSimplePaymentButton();
+        }
+        
+        console.log('Selected payment method:', method);
+    }
+    
+    function updateSimplePaymentButton() {
+        const button = document.getElementById('simplePayButton');
+        if (button) {
+            button.textContent = `Confirmer le paiement (${getPaymentMethodName(selectedPaymentMethod)})`;
+        }
+    }
+    
+    // ========== STRIPE SUBMIT HANDLER ==========
+    async function handleStripeSubmit(e) {
+        // Check if e is an event object
+        if (e && typeof e.preventDefault === 'function') {
+            e.preventDefault();
+        }
+        
+        // Make sure stripe and elements are available
+        if (!stripe || !elements) {
+            showMessage("Le système de paiement n'est pas initialisé", true);
+            return;
+        }
+        
+        setLoading(true, 'stripe');
+        
+        try {
+            const { error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: `${window.location.origin}/client/confirmation?commandeId=${commandeId}&paymentMethod=stripe`,
+                },
+            });
+            
+            if (error) {
+                showMessage(error.message, true);
+                setLoading(false, 'stripe');
+            }
+            // If no error, Stripe will redirect automatically
+        } catch (error) {
+            console.error('Stripe payment error:', error);
+            showMessage('Erreur lors du paiement: ' + error.message, true);
+            setLoading(false, 'stripe');
+        }
+    }
+    
+    // ========== SIMPLE PAYMENT (non-Stripe methods) ==========
+    async function processSimplePayment() {
+        try {
+            setLoading(true, 'simple');
+            
+            console.log("Processing simple payment with method:", selectedPaymentMethod);
+            
+            // Send payment confirmation to server
+            const response = await fetch('/client/payment/confirm-simple', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    commandeId: commandeId,
+                    amount: amount,
+                    paymentMethod: selectedPaymentMethod
+                })
+            });
+            
+            console.log("Simple payment response status:", response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Simple payment error response:", errorText);
+                
+                // Try to parse JSON error
+                try {
+                    const errorData = JSON.parse(errorText);
+                    throw new Error(errorData.message || `Erreur serveur (${response.status})`);
+                } catch {
+                    throw new Error(`Erreur serveur (${response.status})`);
+                }
+            }
+            
+            const data = await response.json();
+            console.log("Simple payment success:", data);
+            
+            if (data.success) {
+                // Redirect to confirmation page
+                window.location.href = `${window.location.origin}/client/confirmation?commandeId=${commandeId}&paymentMethod=${selectedPaymentMethod}&status=success`;
+            } else {
+                showMessage(data.message || 'Erreur de paiement', true);
+                setLoading(false, 'simple');
+            }
+            
+        } catch (error) {
+            console.error('❌ Simple payment error:', error);
+            showMessage('Erreur: ' + error.message, true);
+            setLoading(false, 'simple');
+        }
+    }
+    
+    // ========== HELPER FUNCTIONS ==========
+    function showMessage(messageText, isError = true) {
+        const messageContainer = document.getElementById('payment-message');
+        if (messageContainer) {
+            messageContainer.textContent = messageText;
+            messageContainer.style.color = isError ? '#dc3545' : '#28a745';
+            messageContainer.style.background = isError ? '#f8d7da' : '#d4edda';
+            messageContainer.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds if it's an error
+            if (isError) {
+                setTimeout(() => {
+                    messageContainer.classList.add('hidden');
+                }, 5000);
+            }
+        } else {
+            alert(messageText);
+        }
+    }
+    
+    function setLoading(isLoading, type) {
+        if (type === 'stripe') {
+            const submit = document.getElementById('submit');
+            const spinner = document.getElementById('spinner');
+            const buttonText = document.getElementById('button-text');
+            
+            if (submit && spinner && buttonText) {
+                if (isLoading) {
+                    submit.disabled = true;
+                    spinner.classList.remove('hidden');
+                    buttonText.classList.add('hidden');
+                } else {
+                    submit.disabled = false;
+                    spinner.classList.add('hidden');
+                    buttonText.classList.remove('hidden');
+                }
+            }
+        } else {
+            const button = document.getElementById('simplePayButton');
+            if (button) {
+                if (isLoading) {
+                    button.disabled = true;
+                    button.textContent = 'Traitement en cours...';
+                } else {
+                    button.disabled = false;
+                    button.textContent = `Confirmer le paiement (${getPaymentMethodName(selectedPaymentMethod)})`;
+                }
+            }
+        }
+    }
+    
+    // ========== TEST ROUTES ==========
+    async function testPaymentRoutes() {
+        console.log("Testing payment routes...");
+        
+        try {
+            // Test Stripe check
+            const checkResponse = await fetch('/client/payment/check-stripe');
+            console.log("Stripe check:", await checkResponse.json());
+            
+            // Test simple payment with dummy data
+            const testResponse = await fetch('/client/payment/test');
+            console.log("Payment test:", await testResponse.json());
+            
+        } catch (error) {
+            console.error("Test failed:", error);
+        }
+    }
+</script>
+
+</body>
+</html>

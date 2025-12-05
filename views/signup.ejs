@@ -1,111 +1,288 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Créer un compte</title>
-<style>
-  /* Reset de base */
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
-
-  body {
-    background: linear-gradient(135deg, #fceabb, #ccc);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-
-  form {
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    width: 100%;
-    max-width: 400px;
-    animation: fadeIn 1s ease-in-out;
-  }
-
-  h2 {
-    text-align: center;
-    margin-bottom: 25px;
-    color: #333;
-  }
-
-  input, select {
-    width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    transition: 0.3s;
-    font-size: 16px;
-  }
-
-  input:focus, select:focus {
-    border-color:#ccc;
-    box-shadow: 0 0 8px rgba(248, 181, 0, 0.3);
-    outline: none;
-  }
-
-  button {
-    width: 100%;
-    padding: 12px;
-    background: #ccc;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 18px;
-    transition: 0.3s;
-  }
-
-  button:hover {
-    background: #fceabb;
-    color: #333;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  }
-
-  a {
-    display: block;
-    text-align: center;
-    margin-top: 15px;
-    color: #333;
-    text-decoration: none;
-    font-size: 14px;
-    transition: 0.3s;
-  }
-
-  a:hover {
-    color:#ccc;
-  }
-
-  @keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(-20px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - FoodDelivery</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Navbar - Same as other pages */
+        .navbar { 
+            background: #e44d26; 
+            padding: 1rem 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: white; 
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .logo h2 a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .nav-links a { 
+            color: white; 
+            text-decoration: none; 
+            margin-left: 2rem; 
+            padding: 0.5rem 1rem; 
+            border-radius: 4px; 
+            transition: background 0.3s; 
+        }
+        
+        .nav-links a:hover { 
+            background: rgba(255,255,255,0.2); 
+        }
+        
+        /* Signup Container */
+        .signup-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            padding-top: 80px; /* Account for fixed navbar */
+        }
+        
+        .signup-box {
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 500px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .signup-box h2 {
+            color: #e44d26;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            border-bottom: 3px solid #e44d26;
+            padding-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #f9f9f9;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #e44d26;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(228, 77, 38, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .role-container {
+            position: relative;
+        }
+        
+        .role-container::after {
+            content: "▼";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            pointer-events: none;
+        }
+        
+        .restaurant-field {
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .restaurant-field.show {
+            display: block;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #e44d26;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            background: #c63d1a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(228, 77, 38, 0.3);
+        }
+        
+        .links {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .links a {
+            color: #e44d26;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .links a:hover {
+            color: #c63d1a;
+            text-decoration: underline;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .signup-box {
+                padding: 2rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .signup-box {
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <h2><a href="/">FoodDelivery</a></h2>
+        </div>
+        <div class="nav-links">
+            <a href="/">Accueil</a>
+            <a href="/login">Connexion</a>
+            <a href="/signup">S'inscrire</a>
+        </div>
+    </nav>
 
-<form action="/signup" method="POST">
-    <h2>Créer un compte</h2>
-    <input type="text" name="username" placeholder="Nom" required>
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Mot de passe" required>
+    <div class="signup-container">
+        <div class="signup-box">
+            <h2>Créer un compte</h2>
+            <form action="/signup" method="POST">
+                <div class="form-group">
+                    <input type="text" name="username" placeholder="Nom complet" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="email" name="email" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password" placeholder="Mot de passe" required>
+                    </div>
+                </div>
+                
+                <div class="form-group role-container">
+                    <select name="role" id="roleSelect" required>
+                        <option value="" disabled selected>Sélectionnez un rôle</option>
+                        <option value="Client">Client</option>
+                        <option value="Livreur">Livreur</option>
+                        <option value="Restaurant">Restaurant</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+                
+                <div class="form-group restaurant-field" id="restaurantField">
+                    <input type="text" name="nomRestaurant" placeholder="Nom du restaurant">
+                </div>
+                
+                <button type="submit" class="btn">Créer mon compte</button>
+                
+                <div class="links">
+                    <a href="/login">Déjà un compte ? Connectez-vous</a>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <select name="role" required>
-        <option value="Client">Client</option>
-        <option value="Livreur">Livreur</option>
-        <option value="Restaurant">Restaurant</option>
-        <option value="Admin">Admin</option>
-    </select>
-
-    <input type="text" name="nomRestaurant" placeholder="Nom restaurant (si Restaurant)">
-    <button type="submit">Créer</button>
-
-    <a href="/login">Déjà un compte ?</a>
-</form>
-
+    <script>
+        document.getElementById('roleSelect').addEventListener('change', function() {
+            const restaurantField = document.getElementById('restaurantField');
+            if (this.value === 'Restaurant') {
+                restaurantField.classList.add('show');
+            } else {
+                restaurantField.classList.remove('show');
+            }
+        });
+    </script>
 </body>
 </html>
